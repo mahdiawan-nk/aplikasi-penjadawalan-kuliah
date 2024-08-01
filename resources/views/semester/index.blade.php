@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="card loader-pace">
-                <div class="card-header" {{ in_array(session('role'), [2]) ? '' : 'hidden' }}>
+                <div class="card-header" {{ in_array(session('role'), [1]) ? '' : 'hidden' }}>
                     <button class="btn btn-primary btn-sm add"><i class="fa-solid fa-plus me-1"></i>Tambah Data
                         Semester</button>
                 </div>
