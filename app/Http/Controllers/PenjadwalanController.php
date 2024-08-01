@@ -22,9 +22,9 @@ class PenjadwalanController extends Controller
      */
     public function index(Request $request)
     {
+        $prodiUsers = infoUser()->id_prodi;
 
-
-        if (request()->ajax() || $request->input('ajax')) {
+        // if (request()->ajax() || $request->input('ajax')) {
             $prodiFilter = request()->input('prodi');
             $data = DB::table('v_jadwal');
             if ($prodiFilter != "all") {
@@ -33,11 +33,16 @@ class PenjadwalanController extends Controller
             }
             if (session('role') == 4) {
                 
-                $data->where('semester', $this->getSemester());
+                $data->where('semester', $this->getSemester()->semester);
+                $data->where('data_prodi', 'like', '%' . $this->getSemester()->id_prodi. '%');
             }
             if (session('role') == 3) {
                 $users = Dosen::where('email',session('email'))->first()->id;
                 $data->where('id_dosen', $users);
+            }
+
+            if (session('role') == 2) {
+                $data->where('data_prodi', 'like', '%' . $prodiUsers . '%');
             }
 
             $data->get();
@@ -53,16 +58,19 @@ class PenjadwalanController extends Controller
                 ->addColumn('data_filter', function ($row) use ($prodiFilter) {
                     return $prodiFilter;
                 })
-                ->rawColumns(['data_gedung', 'data_filter']);
+                ->addColumn('data_action', function ($row) use ($prodiFilter) {
+                    return ['id'=>$row->id,'hari'=>$row->hari];
+                })
+                ->rawColumns(['data_gedung', 'data_filter','data_action']);
 
             return $dataTable->make();
-        }
+        // }
 
-        return view('penjadwalan.index');
+        // return view('penjadwalan.index');
     }
 
     private function getSemester(){
-        $dataUser = Mahasiswa::where('email',session('email'))->first()->semester;
+        $dataUser = Mahasiswa::where('email',session('email'))->first();
 
         return $dataUser;
     }

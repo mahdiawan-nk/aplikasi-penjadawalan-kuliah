@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" {{ in_array(session('role'), [2]) ? '' : 'hidden' }}>
                     <button class="btn btn-primary btn-sm add"><i class="fa-solid fa-plus me-1"></i>Tambah Data
                         Dosen</button>
                 </div>
@@ -115,16 +115,17 @@
                             return `<div class="d-flex flex-row">
                                             ${btn}
                                             <button type="button" class="btn btn-outline-warning btn-sm px-2 me-1 edit"
-                                                fdprocessedid="2ybyt"><i
+                                                fdprocessedid="2ybyt" ${roles == 2 ? '' : 'hidden'}><i
                                                     class="fa-solid fa-pen-to-square mr-1"></i>edit</button>
                                             <button type="button" class="btn btn-outline-danger btn-sm px-2 ms-1 hapus"
-                                                fdprocessedid="2ybyt"><i class="fa-solid fa-trash mr-1"></i>Hapus</button>
+                                                fdprocessedid="2ybyt" ${roles == 2 ? '' : 'hidden'}><i class="fa-solid fa-trash mr-1"></i>Hapus</button>
                                         </div>`
                         }
                     }
 
                 ]
             });
+            
 
             $('#prodi-f').change(function(e) {
                 table.ajax.reload()

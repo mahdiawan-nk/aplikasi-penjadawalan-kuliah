@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="card loader-pace">
-                <div class="card-header">
+                <div class="card-header" {{ in_array(session('role'), [2]) ? '' : 'hidden' }}>
                     <button class="btn btn-primary btn-sm add"><i class="fa-solid fa-plus me-1"></i>Tambah Data
                         Semester</button>
                 </div>
@@ -66,7 +66,7 @@
                 console.log('Progress value:', e.detail);
             });
         $(function() {
-            
+            var roles = '{{ session('role') }}'
             const csrfTokens = document.querySelector('meta[name="csrf-token"]').getAttribute(
                 'content');
             var idData = null
@@ -114,6 +114,9 @@
 
                 ]
             });
+            if(roles != 2){
+                table.column(3).visible(false);
+            }
 
             // table.on('init.dt', function() {
             //     closeLoader()
