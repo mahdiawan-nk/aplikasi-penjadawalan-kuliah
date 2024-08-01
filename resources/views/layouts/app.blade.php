@@ -206,7 +206,7 @@
                 selectors: [".page-wrapper"]
             },
             ajax: {
-                trackMethods: ["GET", "POST", "PUT", "DELETE"]
+                trackMethods: ["GET"]
             }
         };
 
