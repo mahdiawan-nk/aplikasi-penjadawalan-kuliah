@@ -29,7 +29,7 @@
                                 </div>
                             </a>
                         </li>
-                        <li class="nav-item" role="presentation" hidden>
+                        <li class="nav-item" role="presentation">
                             <a class="nav-link" data-bs-toggle="tab" href="#primaryprofile" role="tab"
                                 aria-selected="false" tabindex="-1">
                                 <div class="d-flex align-items-center">
@@ -154,6 +154,7 @@
 
     @include('kelas.create')
     @include('kelas.update')
+    
 @endsection
 
 @section('script')
