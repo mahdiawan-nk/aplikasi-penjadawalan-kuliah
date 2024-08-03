@@ -38,7 +38,7 @@
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Semester</label>
                     <div class="col-sm-9">
-                        <select class="form-select" id="semester"
+                        <select class="form-select" id="semester" name="semester"
                             data-placeholder="Pilih Semester" required>
                             <option></option>
                         </select>

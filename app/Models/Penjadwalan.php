@@ -12,7 +12,7 @@ use App\Models\Semester;
 class Penjadwalan extends Model
 {
     use HasFactory;
-    protected $fillable = ['id_matkul','id_kelas','id_dosen','hari','jam_selesai','jam_mulai','rombel','data_prodi'];
+    protected $fillable = ['id_matkul','id_kelas','id_dosen','semester','hari','jam_selesai','jam_mulai','rombel','data_prodi'];
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas');

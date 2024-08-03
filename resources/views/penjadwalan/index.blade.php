@@ -214,19 +214,19 @@
                 $('#e-rombel').val(data.rombel)
                 $('#e-jam_mulai').val(jam[0])
                 $('#e-jam_selesai').val(jam[1])
-                
+
                 $('#e-id_kelas').append(ruang).trigger('change');
                 $('#e-id_dosen').append(dosen).trigger('change');
                 getSemester(data.semester)
                 semester = data.semester
-                let idProdi =[]
+                let idProdi = []
                 data.data_prodi.forEach(element => {
                     idProdi.push(element.id)
                     prodi.push({
                         id: element.id
                     })
                 });
-                getMatkul(idProdi.join('-'),semester)
+                getMatkul(idProdi.join('-'), semester)
                 $('#e-id_matkul').append(matkul).trigger('change');
                 getProdi(prodi)
                 $('#edit-form').modal('show')
@@ -251,6 +251,15 @@
                         return response.json();
                     })
                     .then(data => {
+                        console.log(data)
+                        if (data.status == 'error') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: data.message,
+                            });
+                            return
+                        }
                         $('#add-form').modal('hide')
                         Swal.fire({
                             position: 'top-end',
@@ -624,12 +633,12 @@
             function getDosen() {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
                     'content');
-                    let ads =''
-                    if(prodi != 0){
-                        ads = `&prodi=${prodi}`
-                    }
+                let ads = ''
+                if (prodi != 0) {
+                    ads = `&prodi=${prodi}`
+                }
 
-                fetch('{{ route('master.dosen.index') }}?ajax=true'+ads, {
+                fetch('{{ route('master.dosen.index') }}?ajax=true' + ads, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',

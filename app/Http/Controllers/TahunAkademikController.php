@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\TahunAkademik;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Database\QueryException;
 
 class TahunAkademikController extends Controller
 {
@@ -14,7 +16,8 @@ class TahunAkademikController extends Controller
      */
     public function index()
     {
-        //
+        $data = TahunAkademik::latest('id')->get();
+        return DataTables::of($data)->make();
     }
 
     /**
@@ -35,7 +38,22 @@ class TahunAkademikController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $dataTa = TahunAkademik::where('kode_akademik', $request->kode_akademik)->first();
+        if ($dataTa) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Tahun akademik sudah ada'
+            ];
+            return response()->json($data, 200);
+        }
+
+        $insert = TahunAkademik::create($request->all());
+        $data = [
+            'status' => 'success',
+            'message' => 'Data retrieved successfully',
+            'data' => $request->all()
+        ];
+        return response()->json($data, 200);
     }
 
     /**
@@ -44,9 +62,16 @@ class TahunAkademikController extends Controller
      * @param  \App\Models\TahunAkademik  $tahunAkademik
      * @return \Illuminate\Http\Response
      */
-    public function show(TahunAkademik $tahunAkademik)
+    public function show(TahunAkademik $tahunakademik)
     {
-        //
+        $KodeAkademik = explode('-', $tahunakademik->kode_akademik);
+        $tahunakademik->jenis_periode = $KodeAkademik[1] == 1 ? 'Ganjil' : 'Genap';
+        $data = [
+            'status' => 'success',
+            'message' => 'Data retrieved successfully',
+            'data' => $tahunakademik
+        ];
+        return response()->json($data, 200);
     }
 
     /**
@@ -67,9 +92,15 @@ class TahunAkademikController extends Controller
      * @param  \App\Models\TahunAkademik  $tahunAkademik
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, TahunAkademik $tahunAkademik)
+    public function update(Request $request, TahunAkademik $tahunakademik)
     {
-        //
+        $tahunakademik->fill($request->all())->save();
+        $data = [
+            'status' => 'success',
+            'message' => 'Data retrieved successfully',
+            'data' => $request->all()
+        ];
+        return response()->json($data, 200);
     }
 
     /**

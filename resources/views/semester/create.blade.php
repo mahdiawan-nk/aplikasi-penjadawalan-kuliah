@@ -9,6 +9,14 @@
                 </div>
                 <hr>
                 <div class="row mb-3">
+                    <label for="periode" class="col-sm-3 col-form-label">Tahun Akademik</label>
+                    <div class="col-sm-9">
+                        <select name="id_tahun_akademik" class="form-select" id="id_ta">
+                            <option value="">Pilih Tahun Akademik</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
                     <label for="periode" class="col-sm-3 col-form-label">Periode</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="periode" name="periode"
@@ -18,7 +26,7 @@
                 <div class="row mb-3">
                     <label for="semester" class="col-sm-3 col-form-label">Semester</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="semester" name="semester"
+                        <input type="number" class="form-control" id="semester" name="semester"
                             placeholder="Enter Semester" required>
                     </div>
                 </div>

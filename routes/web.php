@@ -20,6 +20,7 @@ use Telegram\Bot\Laravel\Facades\Telegram;
 use App\Http\Controllers\NotificationController;
 use App\Models\MataKuliah;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\TahunAkademikController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -56,6 +57,7 @@ Route::middleware(['islogin'])->group(function () {
     Route::resource('/penjadwalan', PenjadwalanController::class, ['as' => 'trx', 'except' => ['create', 'edit']]);
     Route::resource('/pengguna', PenggunaController::class, ['as' => 'user', 'except' => ['create', 'edit']]);
     Route::resource('/peminjaman', PeminjamanKelasController::class, ['as' => 'trx', 'except' => ['create', 'edit']]);
+    Route::resource('/tahunakademik', TahunAkademikController::class, ['as' => 'master', 'except' => ['create', 'edit']]);
     Route::get('/peminjaman/create/new', [PeminjamanKelasController::class, 'create'])->name('trx.peminjaman.new');
     Route::get('/peminjaman/create/{peminjaman}', [PeminjamanKelasController::class, 'create'])->name('trx.peminjaman.create');
     Route::get('/pengguna/{id}/{type}/delete', [PenggunaController::class, 'deleteUser'])->name('user.pengguna.deactive');

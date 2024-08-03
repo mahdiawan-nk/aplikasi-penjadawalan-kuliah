@@ -32,11 +32,11 @@ class PenjadwalanController extends Controller
                 $data->where('data_prodi', 'like', '%' . $prodiFilter . '%');
             }
             if (session('role') == 4) {
-                
+
                 $data->where('semester', $this->getSemester());
             }
             if (session('role') == 3) {
-                $users = Dosen::where('email',session('email'))->first()->id;
+                $users = Dosen::where('email', session('email'))->first()->id;
                 $data->where('id_dosen', $users);
             }
 
@@ -61,8 +61,9 @@ class PenjadwalanController extends Controller
         return view('penjadwalan.index');
     }
 
-    private function getSemester(){
-        $dataUser = Mahasiswa::where('email',session('email'))->first()->semester;
+    private function getSemester()
+    {
+        $dataUser = Mahasiswa::where('email', session('email'))->first()->semester;
 
         return $dataUser;
     }
@@ -108,6 +109,49 @@ class PenjadwalanController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // public function store(Request $request)
+    // {
+    //     $dataPost = [
+    //         'id_matkul' => $request->input('id_matkul'),
+    //         'id_kelas' => $request->id_kelas,
+    //         'id_dosen' => $request->id_dosen,
+    //         'hari' => $request->hari,
+    //         'jam_mulai' => $request->jam_mulai,
+    //         'jam_selesai' => $request->jam_selesai,
+    //         'rombel' => $request->rombel,
+    //         'data_prodi' => implode(',', $request->prodi_id)
+    //     ];
+
+    //     // Pemeriksaan apakah ruangan sudah terisi pada hari dan jam yang sama
+    //     $existingSchedule = Penjadwalan::where('id_kelas', $request->id_kelas)
+    //         ->where('hari', $request->hari)
+    //         ->where(function ($query) use ($request) {
+    //             $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
+    //                 ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai]);
+    //         })
+    //         ->exists();
+
+    //     if ($existingSchedule) {
+    //         // Ruangan sudah terisi, kirim pesan error
+    //         $data = [
+    //             'status' => 'error',
+    //             'message' => 'Ruangan sudah diisi pada jadwal yang sama',
+    //             'data' => $dataPost
+    //         ];
+    //         return response()->json($data, 400);
+    //     }
+
+    //     // Ruangan belum terisi, simpan data
+    //     Penjadwalan::create($dataPost);
+
+    //     // Kirim respons sukses
+    //     $data = [
+    //         'status' => 'success',
+    //         'message' => 'Data retrieved successfully',
+    //         'data' => $dataPost
+    //     ];
+    //     return response()->json($data);
+    // }
     public function store(Request $request)
     {
         $dataPost = [
@@ -118,26 +162,73 @@ class PenjadwalanController extends Controller
             'jam_mulai' => $request->jam_mulai,
             'jam_selesai' => $request->jam_selesai,
             'rombel' => $request->rombel,
+            'semester' => $request->semester,
             'data_prodi' => implode(',', $request->prodi_id)
         ];
 
-        // Pemeriksaan apakah ruangan sudah terisi pada hari dan jam yang sama
-        $existingSchedule = Penjadwalan::where('id_kelas', $request->id_kelas)
+        // Pemeriksaan bentrok ruangan
+        $conflictRoom = Penjadwalan::where('id_kelas', $request->id_kelas)
             ->where('hari', $request->hari)
             ->where(function ($query) use ($request) {
                 $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
-                    ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai]);
-            })
-            ->exists();
+                    ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('jam_mulai', '<=', $request->jam_mulai)
+                            ->where('jam_selesai', '>=', $request->jam_selesai);
+                    });
+            });
 
-        if ($existingSchedule) {
-            // Ruangan sudah terisi, kirim pesan error
+        if ($conflictRoom->exists()) {
             $data = [
                 'status' => 'error',
                 'message' => 'Ruangan sudah diisi pada jadwal yang sama',
+                'data' => $conflictRoom->get()
+            ];
+            return response()->json($data, 200);
+        }
+
+        // Pemeriksaan bentrok dosen
+        $conflictDosen = Penjadwalan::where('id_dosen', $request->id_dosen)
+            ->where('hari', $request->hari)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('jam_mulai', '<=', $request->jam_mulai)
+                            ->where('jam_selesai', '>=', $request->jam_selesai);
+                    });
+            })
+            ->exists();
+
+        if ($conflictDosen) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Dosen sudah memiliki jadwal pada waktu yang sama',
                 'data' => $dataPost
             ];
-            return response()->json($data, 400);
+            return response()->json($data, 200);
+        }
+
+        // Pemeriksaan bentrok semester
+        $conflictSemester = Penjadwalan::where('semester', $request->semester)
+            ->where('hari', $request->hari)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('jam_mulai', '<=', $request->jam_mulai)
+                            ->where('jam_selesai', '>=', $request->jam_selesai);
+                    });
+            })
+            ->exists();
+
+        if ($conflictSemester) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Semester sudah memiliki jadwal pada waktu yang sama',
+                'data' => $dataPost
+            ];
+            return response()->json($data,200);
         }
 
         // Ruangan belum terisi, simpan data
@@ -146,11 +237,12 @@ class PenjadwalanController extends Controller
         // Kirim respons sukses
         $data = [
             'status' => 'success',
-            'message' => 'Data retrieved successfully',
+            'message' => 'Data berhasil disimpan',
             'data' => $dataPost
         ];
         return response()->json($data);
     }
+
 
     /**
      * Display the specified resource.
@@ -161,7 +253,7 @@ class PenjadwalanController extends Controller
     public function show($penjadwalan)
     {
 
-        $data = DB::table('v_jadwal')->where('id',$penjadwalan)->first();
+        $data = DB::table('v_jadwal')->where('id', $penjadwalan)->first();
         return response()->json($data);
     }
 

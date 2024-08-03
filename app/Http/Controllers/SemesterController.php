@@ -17,7 +17,7 @@ class SemesterController extends Controller
     public function index(Request $request)
     {
         if (request()->ajax() || $request->input('ajax')) {
-            $data = Semester::query();
+            $data = Semester::with('tahunakademik:id,tahun_akademik')->get();
             return DataTables::of($data)->make();
         }
 
@@ -41,7 +41,7 @@ class SemesterController extends Controller
      */
     public function store(Request $request)
     {
-        $insert = Semester::create($request->all());
+        $insert = Semester::create($request->input());
         $data = [
             'status' => 'success',
             'message' => 'Data retrieved successfully',
