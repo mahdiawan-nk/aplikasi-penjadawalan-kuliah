@@ -11,31 +11,142 @@
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
-                            <li class="breadcrumb-item active" aria-current="page">Tabel Kelas</li>
+                            <li class="breadcrumb-item active" aria-current="page">Data Kelas</li>
                         </ol>
                     </nav>
                 </div>
             </div>
             <div class="card">
-                <div class="card-header">
-                    <button class="btn btn-primary btn-sm add"><i class="fa-solid fa-plus me-1"></i>Tambah Data
-                        Kelas</button>
+                <div class="card-body">
+                    <ul class="nav nav-tabs nav-primary" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#primaryhome" role="tab"
+                                aria-selected="true">
+                                <div class="d-flex align-items-center">
+                                    <div class="tab-icon"><i class="bx bx-home font-18 me-1"></i>
+                                    </div>
+                                    <div class="tab-title">Ruang Kelas</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation" hidden>
+                            <a class="nav-link" data-bs-toggle="tab" href="#primaryprofile" role="tab"
+                                aria-selected="false" tabindex="-1">
+                                <div class="d-flex align-items-center">
+                                    <div class="tab-icon"><i class="bx bx-user-pin font-18 me-1"></i>
+                                    </div>
+                                    <div class="tab-title">Kelas Mahasiswa</div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content py-3">
+                        <div class="tab-pane fade active show" id="primaryhome" role="tabpanel">
+                            <button class="btn btn-primary btn-sm add"><i class="fa-solid fa-plus me-1"></i>Tambah Data
+                                Kelas</button>
+                            <table class="table mb-0 table-striped" id="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">No</th>
+                                        <th scope="col">Nama Gedung</th>
+                                        <th scope="col">Nama Kelas/Ruangan</th>
+                                        <th scope="col">Kapasitas</th>
+                                        <th scope="col">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="primaryprofile" role="tabpanel">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Filtering Data</h5>
+                                            <div class="form-group mb-3">
+                                                <label for="prodi-f" class="col-form-label">Program Studi</label>
+                                                <select id="prodi-f" class="form-control"></select>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button class="btn btn-secondary btn-sm"><i class='bx bx-search-alt-2 pt-0'></i>
+                                                Filter</button>
+                                            <button class="btn btn-warning btn-sm"><i class='bx bx-reset'></i>
+                                                Reset</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <dvi class="col-sm-10">
+                                    <div class="d-flex flex-row w-100 justify-content-between">
+                                        <div class="justify-content-start">
+                                            <button class="btn btn-primary btn-sm add-class"><i class='bx bxs-add-to-queue' ></i> New Class</button>
+                                        </div>
+                                        <div class="justify-content-end">
+                                            <nav aria-label="...">
+                                                <ul class="pagination justify-content-end">
+                                                    <li class="page-item disabled"><a class="page-link" href="javascript:;"
+                                                            tabindex="-1" aria-disabled="true">Previous</a>
+                                                    </li>
+                                                    <li class="page-item"><a class="page-link" href="javascript:;">1</a>
+                                                    </li>
+                                                    <li class="page-item active" aria-current="page"><a class="page-link"
+                                                            href="javascript:;">2 <span
+                                                                class="visually-hidden">(current)</span></a>
+                                                    </li>
+                                                    <li class="page-item"><a class="page-link" href="javascript:;">3</a>
+                                                    </li>
+                                                    <li class="page-item"><a class="page-link" href="javascript:;">Next</a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </div>
+
+                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-6 row-cols-xl-6">
+                                        @foreach (range(1, 20) as $item)
+                                            <div class="col">
+                                                <div class="card border-primary border-bottom border-3 border-0">
+                                                    <img src="{{ asset('static-file/classroom.png') }}"
+                                                        class="card-img-top w-50 d-block mx-auto" alt="...">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title text-primary text-center">Card title</h5>
+                                                        <ul class="list-group">
+                                                            <li
+                                                                class="list-group-item d-flex justify-content-between align-items-center">
+                                                                Jumlah MHS<span
+                                                                    class="badge bg-primary rounded-pill">14</span>
+                                                            </li>
+                                                            <li
+                                                                class="list-group-item d-flex justify-content-between align-items-center">
+                                                                Program Studi<span
+                                                                    class="badge bg-primary rounded-pill">2</span>
+                                                            </li>
+                                                        </ul>
+                                                        <hr>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <a href="javascript:;" class="btn btn-inverse-primary btn-sm"
+                                                                style="font-size: 12px"><i class='bx bx-edit-alt'></i>Edit
+                                                                Class</a>
+                                                            <a href="javascript:;" class="btn btn-danger btn-sm"
+                                                                style="font-size: 12px"><i class='bx bxs-trash'></i>Delete
+                                                                Class</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+
+                                    </div>
+                                </dvi>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <table class="table mb-0 table-striped" id="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">No</th>
-                                <th scope="col">Nama Gedung</th>
-                                <th scope="col">Nama Kelas/Ruangan</th>
-                                <th scope="col">Kapasitas</th>
-                                <th scope="col">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                        </tbody>
-                    </table>
+
                 </div>
             </div>
         </div>
@@ -199,42 +310,42 @@
             });
 
             function deleteData(id) {
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
-                        'content');
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
+                    'content');
 
-                    const url = '{{ route('master.kelas.destroy', ['kela' => ':id']) }}'.replace(':id',
-                        idData);
-                    const requestOptions = {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken // sertakan token CSRF di sini
+                const url = '{{ route('master.kelas.destroy', ['kela' => ':id']) }}'.replace(':id',
+                    idData);
+                const requestOptions = {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken // sertakan token CSRF di sini
+                    }
+                };
+
+                fetch(url, requestOptions)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok.');
                         }
-                    };
-
-                    fetch(url, requestOptions)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok.');
-                            }
-                            return response.json();
+                        return response.json();
+                    })
+                    .then(data => {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "success",
+                            title: "Your work has been Delete",
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then((result) => {
+                            idData = null
+                            table.ajax.reload(null, false);
                         })
-                        .then(data => {
-                            Swal.fire({
-                                position: "top-end",
-                                icon: "success",
-                                title: "Your work has been Delete",
-                                showConfirmButton: false,
-                                timer: 1500
-                            }).then((result) => {
-                                idData = null
-                                table.ajax.reload(null, false);
-                            })
-                        })
-                        .catch(error => {
-                            console.error('Error deleting data:', error);
-                        });
-                }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting data:', error);
+                    });
+            }
         });
     </script>
 @endsection

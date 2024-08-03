@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" {{ in_array(session('role'), [2]) ? '' : 'hidden' }}>
                     <button class="btn btn-primary btn-sm add"><i class="fa-solid fa-plus me-1"></i>Tambah Data
                         Matakuliah</button>
                 </div>
@@ -57,6 +57,7 @@
 @section('script')
     <script>
         $(function() {
+            var roles = '{{ session('role') }}'
             var prodi = '{{ App\helpers\infoUser()->id_prodi ?? 0 }}'
             console.log(prodi)
             if(prodi==0){
@@ -125,7 +126,9 @@
 
                 ]
             });
-
+            if(roles != 2){
+                table.column(6).visible(false);
+            }
 
             $('#prodi-f').change(function(e) {
                 table.ajax.reload()

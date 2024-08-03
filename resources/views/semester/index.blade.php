@@ -35,7 +35,7 @@
                 </div>
             </div>
             <div class="card loader-pace">
-                <div class="card-header">
+                <div class="card-header" {{ in_array(session('role'), [1]) ? '' : 'hidden' }}>
                     <button class="btn btn-primary btn-sm add"><i class="fa-solid fa-plus me-1"></i>Tambah Data
                         Semester</button>
                     <button class="btn btn-secondary btn-sm setting-ta"><i class="fa-solid fa-gears me-1"></i>Setting Tahun

@@ -164,7 +164,9 @@
                 DataKelas()
             }
         });
+         var roles = '{{ session('role') }}'
         $(function() {
+           
             var table = $('#table').DataTable({
                 responsive: true,
                 processing: true,
@@ -339,7 +341,7 @@
                                             <p class="mb-0 text-secondary">${item.nama_kelas}</p>
                                             <p class="mb-0 font-13">${item.kapasitas} MHS</p>
                                         </div>
-                                        <div class="widgets-icons-2 bg-gradient-cosmic text-white ms-auto request" style="cursor:pointer" data-id="${item.uid}">
+                                        <div class="widgets-icons-2 bg-gradient-cosmic text-white ms-auto ${roles == 4 ? 'request' : 'd-none'}" style="cursor:pointer" data-id="${item.uid}">
                                             <i class="fa-solid fa-building"></i>
                                         </div>
                                     </div>
