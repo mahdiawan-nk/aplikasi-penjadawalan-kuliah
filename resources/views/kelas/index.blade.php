@@ -31,7 +31,7 @@
                         </li>
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" data-bs-toggle="tab" href="#primaryprofile" role="tab"
-                                aria-selected="false" tabindex="-1">
+                                aria-selected="false" tabindex="-1" onclick="getProdi()">
                                 <div class="d-flex align-items-center">
                                     <div class="tab-icon"><i class="bx bx-user-pin font-18 me-1"></i>
                                     </div>
@@ -81,7 +81,8 @@
                                 <dvi class="col-sm-10">
                                     <div class="d-flex flex-row w-100 justify-content-between">
                                         <div class="justify-content-start">
-                                            <button class="btn btn-primary btn-sm add-class"><i class='bx bxs-add-to-queue' ></i> New Class</button>
+                                            <button class="btn btn-primary btn-sm add-class"><i
+                                                    class='bx bxs-add-to-queue'></i> New Class</button>
                                         </div>
                                         <div class="justify-content-end">
                                             <nav aria-label="...">
@@ -104,39 +105,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-6 row-cols-xl-6">
-                                        @foreach (range(1, 20) as $item)
-                                            <div class="col">
-                                                <div class="card border-primary border-bottom border-3 border-0">
-                                                    <img src="{{ asset('static-file/classroom.png') }}"
-                                                        class="card-img-top w-50 d-block mx-auto" alt="...">
-                                                    <div class="card-body">
-                                                        <h5 class="card-title text-primary text-center">Card title</h5>
-                                                        <ul class="list-group">
-                                                            <li
-                                                                class="list-group-item d-flex justify-content-between align-items-center">
-                                                                Jumlah MHS<span
-                                                                    class="badge bg-primary rounded-pill">14</span>
-                                                            </li>
-                                                            <li
-                                                                class="list-group-item d-flex justify-content-between align-items-center">
-                                                                Program Studi<span
-                                                                    class="badge bg-primary rounded-pill">2</span>
-                                                            </li>
-                                                        </ul>
-                                                        <hr>
-                                                        <div class="d-flex align-items-center gap-2">
-                                                            <a href="javascript:;" class="btn btn-inverse-primary btn-sm"
-                                                                style="font-size: 12px"><i class='bx bx-edit-alt'></i>Edit
-                                                                Class</a>
-                                                            <a href="javascript:;" class="btn btn-danger btn-sm"
-                                                                style="font-size: 12px"><i class='bx bxs-trash'></i>Delete
-                                                                Class</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
+                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-6 row-cols-xl-6"
+                                        id="list-kelas-mahasiswa">
 
                                     </div>
                                 </dvi>
@@ -154,13 +124,111 @@
 
     @include('kelas.create')
     @include('kelas.update')
-    
+    <div class="modal fade" id="new-class-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content" id="form-kelas-mahasiswa">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Form Kelas Mahasiswa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label for="id_program_study" class="col-sm-3 col-form-label">Program Studi</label>
+                        <div class="col-sm-9">
+                            <select name="id_program_study" id="id_program_study" class="form-control">
+                                <option value="">Pilih Program Study</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="nama_kelas" class="col-sm-3 col-form-label">Nama Kelas</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="nama_kelas" name="nama_kelas_mahasiswa"
+                                placeholder="Enter Nama Kelas" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="jumlah_mahasiswa" class="col-sm-3 col-form-label">Jumlah Mahasiswa</label>
+                        <div class="col-sm-9">
+                            <input type="number" class="form-control" id="jumlah_mahasiswa" name="jumlah_mahasiswa"
+                                placeholder="Enter Jumlah Mahasiswa" required>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @section('script')
     <script>
+        var prodi = '{{ App\helpers\infoUser()->id_prodi ?? 0 }}'
+        var modeForm = 'add';
+        const csrfTokens = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const fetchListKelasMahasiswa = () => {
+            $.ajax({
+                url: '{!! route('master.kelasmahasiswa.index') !!}',
+                type: "GET",
+                data: {
+                    'prodi': prodi
+                },
+                dataType: "JSON",
+                success: function(response) {
+                    renderListKelasMahasiswa(response.data)
+                }
+            })
+        }
+
+        const renderListKelasMahasiswa = (data) => {
+            $('#list-kelas-mahasiswa').html('')
+
+            data.forEach((item) => {
+                $('#list-kelas-mahasiswa').append(`
+                    <div class="col">
+                                                <div class="card border-primary border-bottom border-3 border-0">
+                                                    <img src="{{ asset('static-file/classroom.png') }}"
+                                                        class="card-img-top w-50 d-block mx-auto" alt="...">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title text-primary text-center">${item.nama_kelas}</h5>
+                                                        <ul class="list-group">
+                                                            <li
+                                                                class="list-group-item d-flex justify-content-between align-items-center">
+                                                                Jumlah MHS<span
+                                                                    class="badge bg-primary rounded-pill">${item.jumlah_mahasiswa}</span>
+                                                            </li>
+                                                            <li
+                                                                class="list-group-item d-flex justify-content-between align-items-center">
+                                                                Program Studi<span class="badge bg-primary rounded-pill">${item.programstudi.alias}</span>
+                                                            </li>
+                                                        </ul>
+                                                        <hr>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <a href="javascript:;" class="btn btn-inverse-primary btn-sm edit-kelas" data-id="${item.id}"
+                                                                style="font-size: 12px"><i class='bx bx-edit-alt'></i>Edit
+                                                                Class</a>
+                                                            <a href="javascript:;" class="btn btn-danger btn-sm delete-kelas" data-id="${item.id}"
+                                                                style="font-size: 12px"><i class='bx bxs-trash'></i>Delete
+                                                                Class</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                `)
+            })
+
+        }
+        fetchListKelasMahasiswa()
         $(function() {
             var idData = null
+
             var table = $('#table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -217,6 +285,81 @@
                 $('#edit-form').modal('show')
             });
 
+            $('#list-kelas-mahasiswa').on('click', '.edit-kelas', function(e) {
+                e.preventDefault();
+                let id = $(this).data('id')
+                idData = id
+                modeForm = 'edit'
+                $.ajax({
+                    type: "GET",
+                    url: "{{ url('kelasmahasiswa') }}" + "/" + id,
+                    dataType: "JSON",
+                    success: function(response) {
+                        setTimeout(() => {
+                            $('[name="id_program_study"]').val(response.data
+                                .id_program_study)
+                            $('[name="nama_kelas_mahasiswa"]').val(response.data
+                                .nama_kelas)
+                            $('[name="jumlah_mahasiswa"]').val(response.data
+                                .jumlah_mahasiswa)
+                        }, 1000);
+
+                    }
+                });
+                $('.add-class').trigger('click');
+            });
+
+            $('#list-kelas-mahasiswa').on('click', '.delete-kelas', function(e) {
+                e.preventDefault();
+                let id = $(this).data('id')
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const url = '{{ route('master.kelasmahasiswa.destroy', ['kelasmahasiswa' => ':id']) }}'
+                            .replace(':id',
+                                id);
+                        const requestOptions = {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfTokens // sertakan token CSRF di sini
+                            }
+                        };
+
+                        fetch(url, requestOptions)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok.');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                Swal.fire({
+                                    position: "top-end",
+                                    icon: "success",
+                                    title: "Your work has been Delete",
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then((result) => {
+                                    idData = null
+                                    fetchListKelasMahasiswa()
+                                })
+                            })
+                            .catch(error => {
+                                console.error('Error deleting data:', error);
+                            });
+                    }
+                });
+
+            });
+
             $('form#form-add').submit(function(e) {
                 e.preventDefault();
                 e.stopPropagation()
@@ -245,6 +388,66 @@
                             timer: 1500
                         }).then((result) => {
                             table.ajax.reload()
+                        })
+
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+
+            });
+            $('form#form-kelas-mahasiswa').submit(function(e) {
+                e.preventDefault();
+                e.stopPropagation()
+                console.log(modeForm);
+                let formData = new FormData(this);
+                let url;
+                let requestOptions;
+
+                if (modeForm == 'add') {
+                    url = '{{ route('master.kelasmahasiswa.store') }}';
+                    const formStore = new FormData();
+                    formStore.append('_token', csrfTokens);
+                    formStore.append('id_program_study', $('[name="id_program_study"]').val());
+                    formStore.append('nama_kelas', $('[name="nama_kelas_mahasiswa"]').val());
+                    formStore.append('jumlah_mahasiswa', $('[name="jumlah_mahasiswa"]').val());
+                    requestOptions = {
+                        method: 'POST',
+                        body: formStore,
+                    };
+                } else {
+                    url = '{{ route('master.kelasmahasiswa.update', ['kelasmahasiswa' => ':idData']) }}'
+                        .replace(':idData', idData);
+                    const formUpdate = new FormData();
+                    formUpdate.append('_token', csrfTokens);
+                    formUpdate.append('_method', 'PUT');
+                    formUpdate.append('id_program_study', $('[name="id_program_study"]').val());
+                    formUpdate.append('nama_kelas', $('[name="nama_kelas_mahasiswa"]').val());
+                    formUpdate.append('jumlah_mahasiswa', $('[name="jumlah_mahasiswa"]').val());
+
+                    requestOptions = {
+                        method: 'POST',
+                        body: formUpdate
+                    };
+                }
+
+                fetch(url, requestOptions)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        $('#new-class-modal').modal('hide')
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Your work has been saved',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then((result) => {
+                            fetchListKelasMahasiswa()
                         })
 
                     })
@@ -311,9 +514,6 @@
             });
 
             function deleteData(id) {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
-                    'content');
-
                 const url = '{{ route('master.kelas.destroy', ['kela' => ':id']) }}'.replace(':id',
                     idData);
                 const requestOptions = {
@@ -347,6 +547,43 @@
                         console.error('Error deleting data:', error);
                     });
             }
+
+            $('.add-class').click(function(e) {
+                e.preventDefault();
+                getProdi('#id_program_study', prodi)
+                $('#new-class-modal').modal('show')
+            });
+
+
         });
+
+        function getProdi(element = '#prodi-f', idProdi = 0) {
+            fetch('{{ route('master.prodi.index') }}?ajax=true', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfTokens
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let options = '<option value="">Pilih Program Study</option>';
+                    data.data.forEach(item => {
+                        options +=
+                            `<option value="${item.id}" ${item.id == idProdi || item.id == prodi ? 'selected':''}>${item.jenjang_study}-${item.nama_prodi}</option>`;
+                    });
+                    $(element).html(options);
+
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
     </script>
 @endsection

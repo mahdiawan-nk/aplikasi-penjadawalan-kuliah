@@ -538,12 +538,6 @@
 
                 let formData = new FormData(this);
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                // Log FormData contents
-                formData.forEach((value, key) => {
-                    console.log(key, value);
-                });
-
                 let url;
                 let requestOptions;
 
