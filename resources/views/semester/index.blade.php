@@ -35,10 +35,10 @@
                 </div>
             </div>
             <div class="card loader-pace">
-                <div class="card-header" {{ in_array(session('role'), [1]) ? '' : 'hidden' }}>
-                    <button class="btn btn-primary btn-sm add"><i class="fa-solid fa-plus me-1"></i>Tambah Data
+                <div class="card-header">
+                    <button class="btn btn-primary btn-sm add" {{ in_array(session('role'), [2]) ? '' : 'hidden' }}><i class="fa-solid fa-plus me-1"></i>Tambah Data
                         Semester</button>
-                    <button class="btn btn-secondary btn-sm setting-ta"><i class="fa-solid fa-gears me-1"></i>Setting Tahun
+                    <button class="btn btn-secondary btn-sm setting-ta" {{ in_array(session('role'), [1]) ? '' : 'hidden' }}><i class="fa-solid fa-gears me-1"></i>Setting Tahun
                         Akademik</button>
                 </div>
                 <div class="card-body">
@@ -240,7 +240,7 @@
 
         $(function() {
             var idData = null
-
+            var roles = '{{ session('role') }}'
             let modeForm = 'add';
             const csrfTokens = document.querySelector('meta[name="csrf-token"]').getAttribute(
                 'content');
@@ -296,7 +296,9 @@
                 ]
             });
 
-
+            if (roles != 2) {
+                table.column(3).visible(false);
+            }
             $('#table-ta').css('width', '100%')
             var tableListTahunAkademik = $('#table-ta').DataTable({
                 processing: true,
