@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kelas;
+use App\Models\KelasMahasiswa;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Database\QueryException;
@@ -118,19 +119,60 @@ class KelasController extends Controller
         }
     }
 
-    public function getRuanganGrouped()
+    public function getRuanganGrouped(Request $request)
     {
-        $ruangan = Kelas::all();
+        // Mendapatkan ID rombel dari request
+        $rombelId = $request->input('rombel_id');
 
+        // Mendapatkan jumlah mahasiswa dari KelasMahasiswa berdasarkan ID rombel
+        $jumlahMahasiswa = KelasMahasiswa::where('id', $rombelId)->first()->jumlah_mahasiswa;
+
+        // Menentukan kapasitas minimum dan maksimum berdasarkan jumlah mahasiswa
+        if ($jumlahMahasiswa <= 30) {
+            $kapasitasMin = 25;
+            $kapasitasMax = 30;
+        } elseif ($jumlahMahasiswa <= 40) {
+            $kapasitasMin = 31;
+            $kapasitasMax = 40;
+        } elseif ($jumlahMahasiswa <= 50) {
+            $kapasitasMin = 41;
+            $kapasitasMax = 50;
+        } elseif ($jumlahMahasiswa <= 65) {
+            $kapasitasMin = 51;
+            $kapasitasMax = 65;
+        }
+
+        // Mengambil hari, jam mulai, dan jam selesai dari request
+        $hari = $request->input('hari');
+        $jamMulai = $request->input('jam_mulai');
+        $jamSelesai = $request->input('jam_selesai');
+
+        // Mengambil ruangan yang sesuai dengan kapasitas dan tidak terpakai pada hari, jam mulai, dan jam selesai yang diberikan
+        $ruangan = Kelas::whereBetween('kapasitas', [$kapasitasMin, $kapasitasMax])
+            ->whereDoesntHave('penjadwalan', function ($query) use ($hari, $jamMulai, $jamSelesai) {
+                $query->where('hari', $hari)
+                    ->where(function ($query) use ($jamMulai, $jamSelesai) {
+                        $query->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
+                            ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
+                            ->orWhere(function ($query) use ($jamMulai, $jamSelesai) {
+                                $query->where('jam_mulai', '<=', $jamMulai)
+                                    ->where('jam_selesai', '>=', $jamSelesai);
+                            });
+                    });
+            })
+            ->get();
+
+        // Mengelompokkan ruangan berdasarkan nama gedung
         $groupedRuangan = $ruangan->groupBy('nama_gedung')->map(function ($items) {
             return $items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'text' =>  $item->nama_kelas . ' (' . $item->kapasitas . ')'
+                    'text' => $item->nama_kelas . ' (' . $item->kapasitas . ')'
                 ];
             });
         });
 
+        // Memformat hasil akhir untuk dikembalikan dalam format JSON
         $groupedRuanganFormatted = $groupedRuangan->map(function ($ruangans, $gedungName) {
             return [
                 'text' => 'Gedung ' . $gedungName,

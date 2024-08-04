@@ -10,11 +10,15 @@ use App\Models\PeminjamanKelas;
 class Kelas extends Model
 {
     use HasFactory;
-    protected $fillable=['nama_gedung','nama_kelas','kapasitas'];
+    protected $fillable = ['nama_gedung', 'nama_kelas', 'kapasitas'];
 
 
     public function jadwalKelas()
     {
         return $this->hasMany(PeminjamanKelas::class, 'id_kelas');
+    }
+    public function penjadwalan()
+    {
+        return $this->hasMany(Penjadwalan::class, 'id_kelas');
     }
 }

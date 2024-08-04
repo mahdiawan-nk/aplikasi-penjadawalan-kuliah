@@ -19,10 +19,21 @@ class KelasMahasiswaController extends Controller
         $query = KelasMahasiswa::with('programstudi')->latest('id');
 
         if ($request->has('prodi') && $request->input('prodi') != 0) {
-            $query->where('id_program_study', $request->input('prodi'));
+            $prodi = $request->input('prodi');
+            if (strpos($prodi, '-') !== false) {
+                $prodiArray = explode('-', $prodi);
+                $query->whereIn('id_program_study', $prodiArray);
+            } else {
+                $query->where('id_program_study', $prodi);
+            }
         }
 
-        $dataKelasMahasiswa = $query->paginate(8);
+        if ($request->has('paginate')) {
+            $dataKelasMahasiswa = $query->paginate($request->input('paginate'));
+        } else {
+            $dataKelasMahasiswa = $query->get();
+        }
+
         return response()->json($dataKelasMahasiswa);
     }
 

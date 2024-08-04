@@ -60,6 +60,8 @@ Route::middleware(['islogin'])->group(function () {
     Route::resource('/peminjaman', PeminjamanKelasController::class, ['as' => 'trx', 'except' => ['create', 'edit']]);
     Route::resource('/tahunakademik', TahunAkademikController::class, ['as' => 'master', 'except' => ['create', 'edit']]);
     Route::resource('/kelasmahasiswa', KelasMahasiswaController::class, ['as' => 'master', 'except' => ['create', 'edit']]);
+    
+    Route::post('/jadwal/aproved/{penjadwalan}', [PenjadwalanController::class, 'updateStatus'])->name('trx.jadwal.status');
 
     Route::get('/peminjaman/create/new', [PeminjamanKelasController::class, 'create'])->name('trx.peminjaman.new');
     Route::get('/peminjaman/create/{peminjaman}', [PeminjamanKelasController::class, 'create'])->name('trx.peminjaman.create');

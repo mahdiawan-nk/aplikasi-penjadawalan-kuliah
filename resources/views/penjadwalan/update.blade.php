@@ -32,39 +32,42 @@
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Program Studi</label>
                     <div class="col-sm-9 e-view-prodi d-flex flex-row" style="height: 30vh; overflow-y: auto;">
-                        
+
                     </div>
                 </div>
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Semester</label>
                     <div class="col-sm-9">
-                        <select class="form-select" id="e-semester" name="semester"
-                            data-placeholder="Pilih Semester" required>
+                        <select class="form-select" id="e-semester" name="semester" data-placeholder="Pilih Semester"
+                            required>
                             <option></option>
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Mata Kuliah</label>
                     <div class="col-sm-9">
-                        <select class="form-select" id="e-id_matkul" name="id_matkul" data-placeholder="Pilih Matakuliah" required>
+                        <select class="form-select" id="e-id_matkul" name="id_matkul"
+                            data-placeholder="Pilih Matakuliah" required>
                             <option></option>
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Rombel Kelas</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="e-rombel" name="rombel"
-                            placeholder="Enter Romebel Kelas" required>
+                        <select name="rombel" id="e-rombel" class="form-control">
+                            <option value="">Pilih Rombel</option>
+                        </select>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <label for="nama_matkul" class="col-sm-3 col-form-label">Gedung Ruang Kelas</label>
                     <div class="col-sm-9">
-                        <select class="form-select" id="e-id_kelas" name="id_kelas" data-placeholder="Pilih Ruang Kelas" required>
+                        <select class="form-select" id="e-id_kelas" name="id_kelas" data-placeholder="Pilih Ruang Kelas"
+                            required>
                             <option></option>
                         </select>
                     </div>
@@ -72,7 +75,8 @@
                 <div class="row mb-3">
                     <label for="nama_matkul" class="col-sm-3 col-form-label">Dosen Pengajar</label>
                     <div class="col-sm-9">
-                        <select class="form-select" id="e-id_dosen" name="id_dosen" data-placeholder="Pilih Dosen" required>
+                        <select class="form-select" id="e-id_dosen" name="id_dosen" data-placeholder="Pilih Dosen"
+                            required>
                             <option></option>
                         </select>
                     </div>

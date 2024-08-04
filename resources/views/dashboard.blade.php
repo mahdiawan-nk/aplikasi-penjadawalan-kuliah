@@ -143,6 +143,7 @@
                                 <th>Gedung Ruang</th>
                                 <th>Ruang</th>
                                 <th>Dosen</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -164,9 +165,17 @@
                 DataKelas()
             }
         });
-         var roles = '{{ session('role') }}'
+        var roles = '{{ session('role') }}'
+        // Membuat array nama hari dalam bahasa Indonesia
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        // Mendapatkan hari ini sebagai angka (0-6)
+        const today = new Date().getDay();
+
+        // Mendapatkan nama hari berdasarkan angka
+        const hariIni = days[today];
         $(function() {
-           
+
             var table = $('#table').DataTable({
                 responsive: true,
                 processing: true,
@@ -207,7 +216,7 @@
                         }
                     },
                     {
-                        data: 'rombel'
+                        data: 'data_kelas'
                     },
                     {
                         data: 'hari'
@@ -227,6 +236,18 @@
                     {
                         data: 'nama_dosen'
                     },
+                    {
+                        data: 'data_action.hari',
+                        render(h) {
+                            let button = ''
+                            if (hariIni == h) {
+                                button =
+                                    `<button class="btn btn-block btn-sm btn-info use-room">Gunakan Ruangan</button>`
+                            }
+                            return button
+
+                        },
+                    },
                 ],
                 order: [
                     [9, 'asc']
@@ -241,15 +262,83 @@
                     {
                         visible: false,
                         targets: 10
+                    },
+                    {
+                        visible: roles == 4 ? true : false,
+                        targets: 12
                     }
                 ],
                 rowGroup: {
                     dataSrc: ['hari']
                 }
             });
-
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
                 'content');
+
+            table.on('click', '.use-room', function(e) {
+                e.preventDefault();
+                let data = table.row($(this).parents('tr')).data()
+                let jamJadwal = data.jam.split('-')
+                let paramPenggunaanKelas = {
+                    _token: csrfToken,
+                    id_kelas: data.id_kelas,
+                    id_jadwal: data.id,
+                    id_dosen: data.id_dosen,
+                    hari: data.hari,
+                    jam_mulai: jamJadwal[0],
+                    jam_selesai: jamJadwal[1],
+                    jenis_request: 0,
+                    status_admin: 1,
+                    status_penggunaan: 1,
+                    keterangan: 'Ruangan Digunakan Sesauai Jadwal Yang Diberikan'
+                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: `anda Akan Melakukan Approve jadwal Ini, Sesuai dengan ${data.nama_kelas} Yang diberikan!`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, Gunakan Ruangan!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        $.ajax({
+                            type: "POST",
+                            url: "{{ route('trx.peminjaman.store') }}",
+                            data: paramPenggunaanKelas,
+                            dataType: "JSON",
+                            success: function(response) {
+                                console.log(response)
+                                if (response.success) {
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: 'Your work has been saved',
+                                        text: response.message +
+                                            ` Silahkan Cek Penggunaan Kelas di menu log request ruangan`,
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    }).then((result) => {
+                                        table.ajax.reload()
+                                    })
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: response.message,
+                                    });
+                                }
+                            },
+                            error: function(xhr, ajaxOptions, thrownError) {
+                                console.log(xhr.responseText);
+                            }
+                        });
+                    }
+                });
+            });
+
+
 
             fetch('{{ route('statistik.card') }}', {
                     method: 'GET',

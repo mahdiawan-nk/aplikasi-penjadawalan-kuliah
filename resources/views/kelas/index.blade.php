@@ -207,7 +207,8 @@
                 type: "GET",
                 data: {
                     'prodi': prodi,
-                    'page': page
+                    'page': page,
+                    'paginate':true
                 },
                 // async: false,
                 dataType: "JSON",

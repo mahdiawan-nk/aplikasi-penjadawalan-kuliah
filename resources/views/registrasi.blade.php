@@ -21,7 +21,7 @@
     <title>UP - Sigin</title>
     <style>
         .bg-login {
-            background-image: url(https://sains.universitaspahlawan.ac.id/web/upload/frontend/background/universitaspahlawan.jpg);
+            background-image: url(https://universitaspahlawan.ac.id/wp-content/uploads/2019/04/WhatsApp-Image-2019-02-27-at-11.30.38.jpeg?id=4280);
             background-size: 100% 100%;
             background-repeat: no-repeat;
             min-height: 100%;

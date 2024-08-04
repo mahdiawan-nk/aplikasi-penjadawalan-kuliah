@@ -27,9 +27,15 @@
     <link rel="stylesheet" href="{{ asset('') }}assets/css/dark-theme.css" />
     <link rel="stylesheet" href="{{ asset('') }}assets/css/semi-dark.css" />
     <link rel="stylesheet" href="{{ asset('') }}assets/css/header-colors.css" />
-    <link rel="stylesheet" href="{{ asset('assets/plugins/fontawesome/css/all.min.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('assets/plugins/fontawesome/css/all.min.css') }}" />
     <title>Dashboard</title>
-    <link href="{{ asset('assets/plugins/datatable/datatables.min.css') }}" rel="stylesheet">
+    {{-- <link href="{{ asset('assets/plugins/datatable/datatables.min.css') }}" rel="stylesheet"> --}}
+    <link
+        href="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.1.3/b-3.1.1/b-html5-3.1.1/r-3.0.2/rg-1.5.0/datatables.min.css"
+        rel="stylesheet">
+
+    
+
     <link rel="stylesheet" href="{{ asset('assets/css/select2.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/select2-bootstrap-5-theme.min.css') }}" />
 
@@ -49,7 +55,7 @@
         @include('layouts.header')
         <!--end header -->
         <!--navigation-->
-        @if (in_array(session('role'), [1, 2, 4,3]))
+        @if (in_array(session('role'), [1, 2, 4, 3]))
             @include('layouts.nav')
         @endif
 
@@ -189,10 +195,15 @@
     <script src="{{ asset('') }}assets/plugins/notifications/js/notifications.min.js"></script>
     <!--app JS-->
     <script src="{{ asset('') }}assets/js/app.js"></script>
-    <script src="{{ asset('assets/plugins/datatable/datatables.min.js') }}"></script>
+    {{-- <script src="{{ asset('assets/plugins/datatable/datatables.min.js') }}"></script> --}}
     <script src="{{ asset('assets/plugins/sweetalert2/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/pusher.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script
+        src="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.1.3/b-3.1.1/b-html5-3.1.1/r-3.0.2/rg-1.5.0/datatables.min.js">
+    </script>
     <script>
         paceOptions = {
             ajax: true,

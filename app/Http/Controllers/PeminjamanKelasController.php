@@ -101,6 +101,38 @@ class PeminjamanKelasController extends Controller
         $dataPost = $request->input();
         $dataPost['id_user'] = infoUser()->id;
 
+        // Mendapatkan data dari request
+        $idKelas = $request->input('id_kelas');
+        $hari = $request->input('hari');
+        $jamMulai = $request->input('jam_mulai');
+        $jamSelesai = $request->input('jam_selesai');
+
+        // Cek apakah kelas sudah dipinjam pada waktu yang sama
+        $jamMulai = date('H:i:s', strtotime($jamMulai));
+        $jamSelesai = date('H:i:s', strtotime($jamSelesai));
+
+        // Cek apakah kelas sudah dipinjam pada waktu yang sama
+        $conflict = PeminjamanKelas::where('id_kelas', $request->id_kelas)
+            ->where('id_jadwal', $request->id_jadwal)
+            ->where('hari', $request->hari)
+            ->where('status_penggunaan', 1)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('jam_mulai', '<=', $request->jam_mulai)
+                            ->where('jam_selesai', '>=', $request->jam_selesai);
+                    });
+            });
+
+        if ($conflict->exists()) {
+            $response = [
+                'success' => false,
+                'message' => 'Ruangan sudah digunakan atau dipinjam',
+            ];
+            return response()->json($response, 200);
+        }
+
         PeminjamanKelas::create($dataPost);
 
         $userReceiver = User::where('role', 1)->first()->id;
@@ -109,7 +141,13 @@ class PeminjamanKelasController extends Controller
         $receiverUser = $userReceiver;
 
         TelegramSend($senderUser, $receiverUser, infoUser($receiverUser)->role, ['keterangan' => $dataPost['keterangan'], 'status_admin' => $dataPost['status_admin'], 'status_penggunaan' => $dataPost['status_penggunaan']]);
-        return response()->json($dataPost);
+        $response = [
+            'success' => true,
+            'message' => 'Request/Konfirmasi penggunaan kelas berhasil dilakukan',
+            'data' => $conflict->get(),
+            'data2' => $dataPost
+        ];
+        return response()->json($response, 200);
     }
 
     /**
@@ -164,7 +202,7 @@ class PeminjamanKelasController extends Controller
         $receiverUser = $userReceiver;
 
         TelegramSend($senderUser, $receiverUser, infoUser($receiverUser)->role, ['keterangan' => null, 'status_admin' => $request->status_admin, 'status_penggunaan' => $request->status_penggunaan]);
-        
+
         return response()->json($data);
     }
 

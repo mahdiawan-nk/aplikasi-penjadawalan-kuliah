@@ -6,6 +6,7 @@ use App\Models\Penjadwalan;
 use App\Models\Mahasiswa;
 use App\Models\ProgramStudi;
 use App\Models\Dosen;
+use App\Models\KelasMahasiswa;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Database\QueryException;
@@ -24,7 +25,7 @@ class PenjadwalanController extends Controller
     {
         $prodiUsers = infoUser()->id_prodi;
 
-        // if (request()->ajax() || $request->input('ajax')) {
+        if (request()->ajax() || $request->input('ajax')) {
             $prodiFilter = request()->input('prodi');
             $data = DB::table('v_jadwal');
             if ($prodiFilter != "all") {
@@ -32,9 +33,9 @@ class PenjadwalanController extends Controller
                 $data->where('data_prodi', 'like', '%' . $prodiFilter . '%');
             }
             if (session('role') == 4) {
-                
+
                 $data->where('semester', $this->getSemester()->semester);
-                $data->where('data_prodi', 'like', '%' . $this->getSemester()->id_prodi. '%');
+                $data->where('data_prodi', 'like', '%' . $this->getSemester()->id_prodi . '%');
             }
             if (session('role') == 3) {
                 $users = Dosen::where('email', session('email'))->first()->id;
@@ -49,6 +50,9 @@ class PenjadwalanController extends Controller
 
             $dataTable = DataTables::of($data);
             $dataTable->addIndexColumn()
+                ->addColumn('data_kelas', function ($row) {
+                    return KelasMahasiswa::where('id', $row->rombel)->first()->nama_kelas;
+                })
                 ->addColumn('data_prodi', function ($row) {
                     return $this->dataProdi(explode(',', $row->data_prodi));
                 })
@@ -59,18 +63,22 @@ class PenjadwalanController extends Controller
                     return $prodiFilter;
                 })
                 ->addColumn('data_action', function ($row) use ($prodiFilter) {
-                    return ['id'=>$row->id,'hari'=>$row->hari];
+                    return ['id' => $row->id, 'hari' => $row->hari];
                 })
-                ->rawColumns(['data_gedung', 'data_filter','data_action']);
+                ->addColumn('data_keys', function ($row) {
+                    return ['status' => $row->status, 'kunci' => $row->kunci];
+                })
+                ->rawColumns(['data_kelas', 'data_gedung', 'data_filter', 'data_action']);
 
             return $dataTable->make();
-        // }
+        }
 
-        // return view('penjadwalan.index');
+        return view('penjadwalan.index');
     }
 
-    private function getSemester(){
-        $dataUser = Mahasiswa::where('email',session('email'))->first();
+    private function getSemester()
+    {
+        $dataUser = Mahasiswa::where('email', session('email'))->first();
 
         return $dataUser;
     }
@@ -116,49 +124,7 @@ class PenjadwalanController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // public function store(Request $request)
-    // {
-    //     $dataPost = [
-    //         'id_matkul' => $request->input('id_matkul'),
-    //         'id_kelas' => $request->id_kelas,
-    //         'id_dosen' => $request->id_dosen,
-    //         'hari' => $request->hari,
-    //         'jam_mulai' => $request->jam_mulai,
-    //         'jam_selesai' => $request->jam_selesai,
-    //         'rombel' => $request->rombel,
-    //         'data_prodi' => implode(',', $request->prodi_id)
-    //     ];
 
-    //     // Pemeriksaan apakah ruangan sudah terisi pada hari dan jam yang sama
-    //     $existingSchedule = Penjadwalan::where('id_kelas', $request->id_kelas)
-    //         ->where('hari', $request->hari)
-    //         ->where(function ($query) use ($request) {
-    //             $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
-    //                 ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai]);
-    //         })
-    //         ->exists();
-
-    //     if ($existingSchedule) {
-    //         // Ruangan sudah terisi, kirim pesan error
-    //         $data = [
-    //             'status' => 'error',
-    //             'message' => 'Ruangan sudah diisi pada jadwal yang sama',
-    //             'data' => $dataPost
-    //         ];
-    //         return response()->json($data, 400);
-    //     }
-
-    //     // Ruangan belum terisi, simpan data
-    //     Penjadwalan::create($dataPost);
-
-    //     // Kirim respons sukses
-    //     $data = [
-    //         'status' => 'success',
-    //         'message' => 'Data retrieved successfully',
-    //         'data' => $dataPost
-    //     ];
-    //     return response()->json($data);
-    // }
     public function store(Request $request)
     {
         $dataPost = [
@@ -172,7 +138,10 @@ class PenjadwalanController extends Controller
             'semester' => $request->semester,
             'data_prodi' => implode(',', $request->prodi_id)
         ];
-
+        if(session('role') == 1){
+            $dataPost['kunci'] = 1;
+            $dataPost['status'] = 1;
+        }
         // Pemeriksaan bentrok ruangan
         $conflictRoom = Penjadwalan::where('id_kelas', $request->id_kelas)
             ->where('hari', $request->hari)
@@ -235,7 +204,7 @@ class PenjadwalanController extends Controller
                 'message' => 'Semester sudah memiliki jadwal pada waktu yang sama',
                 'data' => $dataPost
             ];
-            return response()->json($data,200);
+            return response()->json($data, 200);
         }
 
         // Ruangan belum terisi, simpan data
@@ -318,5 +287,29 @@ class PenjadwalanController extends Controller
             'status' => 'success',
             'message' => 'Data Berhasil Di hapus',
         ]);
+    }
+
+    public function updateStatus(Request $request, Penjadwalan $penjadwalan)
+    {
+        if ($request->has('status')) {
+            $penjadwalan->status = $request->status;
+            $penjadwalan->kunci = 1;
+            $penjadwalan->save();
+            $data = [
+                'status' => 'success',
+                'message' => 'Jadwal Has Approved',
+            ];
+        }
+        if ($request->has('kunci')) {
+            $penjadwalan->kunci = $request->kunci;
+            $penjadwalan->save();
+            $data = [
+                'status' => 'success',
+                'message' => 'Jadwal Has '.$request->kunci == 1 ? 'Locked' : 'Unlocked',
+            ];
+        }
+
+
+        return response()->json($data, 200);
     }
 }

@@ -43,6 +43,7 @@
                                 <th>Gedung</th>
                                 <th>Ruang</th>
                                 <th>Dosen</th>
+                                <th>Keterangan</th>
                                 <th>Act</th>
                             </tr>
                         </thead>
@@ -60,9 +61,24 @@
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        var roles = '{{ session('role') }}'
+        var prodi = '{{ App\helpers\infoUser()->id_prodi ?? 0 }}'
+        var semester = null
+
+        const fetchRombel = async (prodi) => {
+            const res = await fetch('/kelasmahasiswa?prodi=' + prodi)
+            const data = await res.json()
+            let viewRombel = $('#rombel,#e-rombel')
+            viewRombel.empty()
+            viewRombel.html(`<option value="">-- Pilih Rombel --</option>`)
+            data.forEach(element => {
+                viewRombel.append(
+                    `<option value="${element.id}">${element.nama_kelas} - ${element.jumlah_mahasiswa} MHS</option>`
+                )
+            });
+        }
         $(function() {
-            var prodi = '{{ App\helpers\infoUser()->id_prodi ?? 0 }}'
-            var semester = null
+
             getProdi()
             if (prodi == 0) {
                 $('#id_prodi,#e-id_prodi').attr('readonly', false)
@@ -139,7 +155,7 @@
                         }
                     },
                     {
-                        data: 'rombel'
+                        data: 'data_kelas'
                     },
                     {
                         data: 'hari'
@@ -160,9 +176,35 @@
                         data: 'nama_dosen'
                     },
                     {
-                        data: 'id',
+                        data: 'data_keys',
+                        render(h) {
+                            return `<ul class="list-group">
+									<li class="list-group-item d-flex justify-content-between align-items-center">Status<span class="badge bg-${h.status == 0 ? 'info' : h.status == 1? 'success' : 'danger'} rounded-pill">${h.status == 0 ? 'Pending' : h.status == 1? 'Approved' : 'Rejected'}</span>
+									</li>
+									<li class="list-group-item d-flex justify-content-between align-items-center">Kunci<span class="badge bg-${h.kunci == 0 ? 'success':'danger'} rounded-pill">${h.kunci == 0 ? 'No':'Yes'}</span>
+									</li>
+								</ul>`
+                        },
+                    },
+                    {
+                        data: 'data_keys',
                         render: function(data) {
+                            let button = ''
+                            if (data.status == 0) {
+                                button =
+                                    '<button type="button" class="btn btn-outline-success btn-sm px-2 ms-1 approve" fdprocessedid="2ybyt"><i class="fa-solid fa-check mr-1"></i>Approve</button>'
+                            }
+                            if (data.status == 1) {
+                                if (data.kunci == 0) {
+                                    button =
+                                        '<button type="button" class="btn btn-outline-warning btn-sm px-2 ms-1 lock" fdprocessedid="2ybyt"><i class="bx bx-lock mr-1"></i>Lock</button>'
+                                } else {
+                                    button =
+                                        '<button type="button" class="btn btn-outline-success btn-sm px-2 ms-1 unlock" fdprocessedid="2ybyt"><i class="bx bx-lock-open mr-1"></i>Open</button>'
+                                }
+                            }
                             return `<div class="d-flex flex-row">
+                                            ${roles == 1 ?button:''}
                                             <button type="button" class="btn btn-outline-warning btn-sm px-2 me-1 edit"
                                                 fdprocessedid="2ybyt"><i
                                                     class="fa-solid fa-pen-to-square mr-1"></i>edit</button>
@@ -185,6 +227,21 @@
                 }],
                 rowGroup: {
                     dataSrc: ['data_gedung', 'hari']
+                },
+                layout: {
+                    topStart: {
+                        buttons: [{
+                                text: 'Cetak Jadwal',
+                                title: 'Jadwal Perkuliahan',
+                                extend: 'pdfHtml5',
+                                orientation: 'landscape',
+                                exportOptions: {
+                                    columns: [0, 1, 3, 4, 5, 6, 7, 8, 9, 11]
+                                }
+                            },
+                            'colvis'
+                        ]
+                    }
                 }
             });
 
@@ -202,34 +259,164 @@
                 $('#add-form').modal('show')
             })
 
+            table.on('click', '.approve', function() {
+                let data = table.row($(this).parents('tr')).data()
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Anda akan melakukan Approve jadwal Ini!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, Approve it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{{ url('jadwal/aproved') }}/" + data.id,
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                status: 1
+                            },
+                            dataType: "JSON",
+                            success: function(response) {
+                                console.log(response)
+                                Swal.fire({
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: response.message,
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then((result) => {
+                                    table.ajax.reload()
+                                })
+
+                            }
+                        });
+                    }
+                });
+            })
+
+            table.on('click', '.unlock', function() {
+                let data = table.row($(this).parents('tr')).data()
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Anda akan membuka kunci jadwal Ini, kaprodi dapat melakukan edit dan delete jadwal!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, Unlock it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{{ url('jadwal/aproved') }}/" + data.id,
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                kunci: 0
+                            },
+                            dataType: "JSON",
+                            success: function(response) {
+                                console.log(response)
+                                Swal.fire({
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: response.message,
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then((result) => {
+                                    table.ajax.reload()
+                                })
+
+                            }
+                        });
+                    }
+                });
+            })
+
+            table.on('click', '.lock', function() {
+                let data = table.row($(this).parents('tr')).data()
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Anda akan kunci jadwal Ini, kaprodi tidak dapat melakukan edit dan delete jadwal!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, lock it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{{ url('jadwal/aproved') }}/" + data.id,
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                kunci: 1
+                            },
+                            dataType: "JSON",
+                            success: function(response) {
+                                console.log(response)
+                                Swal.fire({
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: response.message,
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then((result) => {
+                                    table.ajax.reload()
+                                })
+
+                            }
+                        });
+                    }
+                });
+            })
             table.on('click', '.edit', function() {
                 let data = table.row($(this).parents('tr')).data()
                 idData = data.id
-                let prodi = []
-                let jam = data.jam.split('-')
-                let matkul = new Option(data.nama_matkul, data.id_matkul, false, true);
-                let ruang = new Option(data.nama_kelas, data.id_kelas, true, true);
-                let dosen = new Option(data.nama_dosen, data.id_dosen, true, true);
-                $('#e-hari').val(data.hari)
-                $('#e-rombel').val(data.rombel)
-                $('#e-jam_mulai').val(jam[0])
-                $('#e-jam_selesai').val(jam[1])
+                let statusKeys = false
+                if (roles == 2) {
+                    if (data.data_keys.kunci == 1) {
+                        Swal.fire({
+                            title: "Ooops",
+                            text: "You can't edit this data, because it's locked",
+                            icon: "warning",
+                        });
+                        return
+                    }
+                    statusKeys = true
+                }
+                if (statusKeys) {
+                    let prodi = []
+                    let jam = data.jam.split('-')
+                    let matkul = new Option(data.nama_matkul, data.id_matkul, false, true);
+                    let ruang = new Option(data.nama_kelas, data.id_kelas, true, true);
+                    let dosen = new Option(data.nama_dosen, data.id_dosen, true, true);
+                    setTimeout(() => {
+                        $('#e-hari').val(data.hari)
+                        $('#e-rombel').val(data.rombel).trigger('change');
+                        $('#e-jam_mulai').val(jam[0])
+                        $('#e-jam_selesai').val(jam[1])
+                        getKelas(data.rombel, hari, jam[0], jam[1])
+                        $('#e-id_kelas').append(ruang).trigger('change');
+                        $('#e-id_dosen').append(dosen).trigger('change');
+                    }, 1000);
 
-                $('#e-id_kelas').append(ruang).trigger('change');
-                $('#e-id_dosen').append(dosen).trigger('change');
-                getSemester(data.semester)
-                semester = data.semester
-                let idProdi = []
-                data.data_prodi.forEach(element => {
-                    idProdi.push(element.id)
-                    prodi.push({
-                        id: element.id
-                    })
-                });
-                getMatkul(idProdi.join('-'), semester)
-                $('#e-id_matkul').append(matkul).trigger('change');
-                getProdi(prodi)
-                $('#edit-form').modal('show')
+                    getSemester(data.semester)
+                    semester = data.semester
+                    let idProdi = []
+                    data.data_prodi.forEach(element => {
+                        idProdi.push(element.id)
+                        prodi.push({
+                            id: element.id
+                        })
+                    });
+                    getMatkul(idProdi.join('-'), semester)
+                    $('#e-id_matkul').append(matkul).trigger('change');
+                    getProdi(prodi)
+                    $('#edit-form').modal('show')
+                }
             });
 
             $('form#form-add').submit(function(e) {
@@ -354,22 +541,60 @@
                 getMatkul(prodi, ids);
             });
 
+            $('#single-select-field,#e-id_matkul').on('change', function(e) {
+                e.preventDefault();
+                let ids = $(this).val()
+                $('#rombel').removeAttr('disabled');
+                fetchRombel(prodi)
+            });
+
+            $('#rombel').change(function(e) {
+                e.preventDefault();
+                let ids = $(this).val()
+                let hari = $('#hari').val()
+                let jam_mulai = $('#jam_mulai').val()
+                let jam_selesai = $('#jam_selesai').val()
+                $('#id_kelas').removeAttr('disabled');
+                getKelas(ids, hari, jam_mulai, jam_selesai)
+            });
+
+            $('#id_kelas').change(function(e) {
+                e.preventDefault();
+                $('#id_dosen').removeAttr('disabled');
+
+            });
+
             table.on('click', '.hapus', function() {
                 let data = table.row($(this).parents('tr')).data()
                 idData = data.id
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "Data Akan Dihapus!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Yes, delete it!"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        deleteData(idData)
+                let statusKeys = false
+                if (roles == 2) {
+                    if (data.data_keys.kunci == 1) {
+                        Swal.fire({
+                            title: "Ooops",
+                            text: "You can't delete this data, because it's locked",
+                            icon: "warning",
+                        });
+                        return
                     }
-                });
+                    statusKeys = true
+                }
+
+                if (statusKeys) {
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: "Data Akan Dihapus!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Yes, delete it!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            deleteData(idData)
+                        }
+                    });
+                }
             });
 
             function deleteData(id) {
@@ -409,7 +634,6 @@
                         console.error('Error deleting data:', error);
                     });
             }
-            getKelas()
             getDosen()
 
             function getProdi(datas = null) {
@@ -543,7 +767,7 @@
                 });
             }
             $('#add-form').on('show.bs.modal', function(e) {
-                $('#semester,#single-select-field').attr('disabled', true)
+                $('#semester,#single-select-field,#rombel,#id_kelas,#id_dosen').attr('disabled', true)
             });
 
             $('#add-form').on('hide.bs.modal', function(e) {
@@ -589,13 +813,19 @@
                 initializeSelect2(data)
             }
 
-            function getKelas() {
+            function getKelas(rombel, hari, jamMulai, jamSelesai) {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
                     'content');
-                const url = '{{ route('master.kelas.getgrouped', ['group' => ':idData']) }}'.replace(
-                    ':idData', 'all');
+                const url = '{{ url('kelas/all/grouped') }}' +
+                    `?rombel_id=${rombel}&hari=${hari}&jam_mulai=${jamMulai}&jam_selesai=${jamSelesai}`;
                 fetch(url, {
                         method: 'GET',
+                        parameters: {
+                            rombel_id: rombel,
+                            hari: hari,
+                            jam_mulai: jam_mulai,
+                            jam_selesai: jam_selesai
+                        },
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',

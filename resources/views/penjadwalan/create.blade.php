@@ -13,7 +13,7 @@
                     <div class="col-sm-3">
                         <select name="hari" id="hari" class="form-control" required>
                             <option value="">Pilih Hari</option>
-                            <?php $hariIndo = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']; ?>
+                            <?php $hariIndo = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu','Minggu']; ?>
                             @foreach ($hariIndo as $hari)
                                 <option value="{{ $hari }}">{{ $hari }}</option>
                             @endforeach
@@ -57,8 +57,9 @@
                 <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Rombel Kelas</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="rombel" name="rombel"
-                            placeholder="Enter Romebel Kelas" required>
+                        <select name="rombel" id="rombel" class="form-control">
+                            <option value="">Pilih Rombel</option>
+                        </select>
                     </div>
                 </div>
                 <div class="row mb-3">
