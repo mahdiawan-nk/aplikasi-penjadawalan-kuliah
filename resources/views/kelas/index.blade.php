@@ -61,7 +61,7 @@
                         </div>
                         <div class="tab-pane fade" id="primaryprofile" role="tabpanel">
                             <div class="row">
-                                <div class="col-sm-2">
+                                <div class="col-sm-2" id="filtering">
                                     <div class="card">
                                         <div class="card-body">
                                             <h5 class="card-title">Filtering Data</h5>
@@ -71,14 +71,16 @@
                                             </div>
                                         </div>
                                         <div class="card-footer">
-                                            <button class="btn btn-secondary btn-sm"><i class='bx bx-search-alt-2 pt-0'></i>
+                                            <button class="btn btn-secondary btn-sm" id="filter"><i
+                                                    class='bx bx-search-alt-2 pt-0'></i>
                                                 Filter</button>
-                                            <button class="btn btn-warning btn-sm"><i class='bx bx-reset'></i>
+                                            <button class="btn btn-warning btn-sm" id="reset"><i
+                                                    class='bx bx-reset'></i>
                                                 Reset</button>
                                         </div>
                                     </div>
                                 </div>
-                                <dvi class="col-sm-10">
+                                <dvi class="col-sm-10" id="list-kelas">
                                     <div class="d-flex flex-row w-100 justify-content-between">
                                         <div class="justify-content-start">
                                             <button class="btn btn-primary btn-sm add-class"><i
@@ -87,27 +89,44 @@
                                         <div class="justify-content-end">
                                             <nav aria-label="...">
                                                 <ul class="pagination justify-content-end">
-                                                    <li class="page-item disabled"><a class="page-link" href="javascript:;"
-                                                            tabindex="-1" aria-disabled="true">Previous</a>
+                                                    <li class="page-item" id="prev"><a class="page-link"
+                                                            href="javascript:;" tabindex="-1"
+                                                            aria-disabled="true">Previous</a>
                                                     </li>
-                                                    <li class="page-item"><a class="page-link" href="javascript:;">1</a>
-                                                    </li>
-                                                    <li class="page-item active" aria-current="page"><a class="page-link"
-                                                            href="javascript:;">2 <span
-                                                                class="visually-hidden">(current)</span></a>
-                                                    </li>
-                                                    <li class="page-item"><a class="page-link" href="javascript:;">3</a>
-                                                    </li>
-                                                    <li class="page-item"><a class="page-link" href="javascript:;">Next</a>
+
+                                                    <li class="page-item" id="next"><a class="page-link"
+                                                            href="javascript:;">Next</a>
                                                     </li>
                                                 </ul>
                                             </nav>
                                         </div>
                                     </div>
 
-                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-6 row-cols-xl-6"
+                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 row-cols-xl-4"
                                         id="list-kelas-mahasiswa">
 
+                                    </div>
+                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-1 row-cols-xl-1"
+                                        style="display: none" id="alert-info">
+                                        <div
+                                            class="alert border-0 border-start border-5 border-info alert-dismissible fade show py-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="font-35 text-info"><i class="bx bx-info-square"></i>
+                                                </div>
+                                                <div class="ms-3">
+                                                    <h6 class="mb-0 text-info"Oooops</h6>
+                                                        <div>Data Kelas Tidak Ditemukan</div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close" fdprocessedid="v95uju"></button>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-sm-12">
+                                            <label for="">Showing</label>
+                                            <label for="" id="showing"></label>
+                                        </div>
                                     </div>
                                 </dvi>
                             </div>
@@ -170,26 +189,63 @@
 @section('script')
     <script>
         var prodi = '{{ App\helpers\infoUser()->id_prodi ?? 0 }}'
+        if (prodi == 0) {
+            $('#id_program_study').attr('readonly', false)
+        } else {
+            $('#filtering').hide()
+
+            $('#list-kelas').removeClass('col-sm-10').addClass('col-sm-12')
+            $('#id_program_study').attr('readonly', true)
+        }
         var modeForm = 'add';
         const csrfTokens = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        const fetchListKelasMahasiswa = () => {
+        let currentPage = 1
+        let lastPage = 1;
+        const fetchListKelasMahasiswa = (page, prodi) => {
             $.ajax({
                 url: '{!! route('master.kelasmahasiswa.index') !!}',
                 type: "GET",
                 data: {
-                    'prodi': prodi
+                    'prodi': prodi,
+                    'page': page
                 },
+                // async: false,
                 dataType: "JSON",
                 success: function(response) {
                     renderListKelasMahasiswa(response.data)
+                    updatePaginationInfo(response)
+                    renderPaginationControls()
+
                 }
             })
         }
+        const updatePaginationInfo = (data) => {
+            currentPage = data.current_page;
+            lastPage = data.last_page;
+            $('#showing').html(`<b>${data.from}</b> to <b>${data.to}</b> of <b>${data.total}</b> entries`);
+        };
+
+        const renderPaginationControls = () => {
+            if (currentPage === 1) {
+                $('#prev').addClass('disabled');
+            } else {
+                $('#prev').removeClass('disabled');
+            }
+            if (currentPage === lastPage) {
+                $('#next').addClass('disabled');
+            } else {
+                $('#next').removeClass('disabled');
+            }
+        };
 
         const renderListKelasMahasiswa = (data) => {
             $('#list-kelas-mahasiswa').html('')
+            if (data.length == 0) {
+                $('#alert-info').show()
+                return
+            }
 
+            $('#alert-info').hide()
             data.forEach((item) => {
                 $('#list-kelas-mahasiswa').append(`
                     <div class="col">
@@ -225,7 +281,8 @@
             })
 
         }
-        fetchListKelasMahasiswa()
+
+        fetchListKelasMahasiswa(currentPage, prodi)
         $(function() {
             var idData = null
 
@@ -322,7 +379,8 @@
                     confirmButtonText: "Yes, delete it!"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        const url = '{{ route('master.kelasmahasiswa.destroy', ['kelasmahasiswa' => ':id']) }}'
+                        const url =
+                            '{{ route('master.kelasmahasiswa.destroy', ['kelasmahasiswa' => ':id']) }}'
                             .replace(':id',
                                 id);
                         const requestOptions = {
@@ -358,6 +416,25 @@
                     }
                 });
 
+            });
+
+            $('#prev > a').on('click', function(e) {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    fetchListKelasMahasiswa(currentPage - 1, prodi)
+                }
+            });
+            $('#next > a').on('click', function(e) {
+                e.preventDefault();
+                if (currentPage < lastPage) {
+                    fetchListKelasMahasiswa(currentPage + 1, prodi)
+                }
+            });
+
+            $('#filter').click(function(e) {
+                e.preventDefault();
+                let valFilter = $('#prodi-f').val()
+                fetchListKelasMahasiswa(currentPage, valFilter)
             });
 
             $('form#form-add').submit(function(e) {
@@ -551,6 +628,8 @@
             $('.add-class').click(function(e) {
                 e.preventDefault();
                 getProdi('#id_program_study', prodi)
+                $('[name="nama_kelas_mahasiswa"]').val('')
+                $('[name="jumlah_mahasiswa"]').val('')
                 $('#new-class-modal').modal('show')
             });
 

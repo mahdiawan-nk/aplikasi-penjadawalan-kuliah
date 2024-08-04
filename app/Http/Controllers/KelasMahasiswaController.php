@@ -14,11 +14,18 @@ class KelasMahasiswaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $dataKelasMahasiswa = KelasMahasiswa::with('programstudi')->latest('id')->paginate(12);
+        $query = KelasMahasiswa::with('programstudi')->latest('id');
+
+        if ($request->has('prodi') && $request->input('prodi') != 0) {
+            $query->where('id_program_study', $request->input('prodi'));
+        }
+
+        $dataKelasMahasiswa = $query->paginate(8);
         return response()->json($dataKelasMahasiswa);
     }
+
 
     /**
      * Show the form for creating a new resource.
