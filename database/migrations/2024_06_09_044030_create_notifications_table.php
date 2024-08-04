@@ -19,7 +19,12 @@ class CreateNotificationsTable extends Migration
             $table->unsignedInteger('id_user_receiver');
             $table->string('title');
             $table->text('body');
+            $table->boolean('is_read')->default(0);
             $table->timestamps();
+
+            $table->foreign('id_user_sender')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('id_user_receiver')->references('id')->on('users')->onDelete('cascade');
+            
         });
     }
 

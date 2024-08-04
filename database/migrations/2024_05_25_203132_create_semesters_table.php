@@ -15,9 +15,12 @@ class CreateSemestersTable extends Migration
     {
         Schema::create('semesters', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('id_tahun_akademik');
             $table->string('periode');
             $table->string('semester');
             $table->timestamps();
+
+            $table->foreign('id_tahun_akademik')->references('id')->on('tahun_akademiks')->onDelete('cascade');
         });
     }
 

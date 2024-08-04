@@ -29,7 +29,7 @@ class KelasMahasiswaController extends Controller
         }
 
         if ($request->has('paginate')) {
-            $dataKelasMahasiswa = $query->paginate($request->input('paginate'));
+            $dataKelasMahasiswa = $query->paginate(6);
         } else {
             $dataKelasMahasiswa = $query->get();
         }

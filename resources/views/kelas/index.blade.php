@@ -241,6 +241,7 @@
 
         const renderListKelasMahasiswa = (data) => {
             $('#list-kelas-mahasiswa').html('')
+            console.log(data.length)
             if (data.length == 0) {
                 $('#alert-info').show()
                 return

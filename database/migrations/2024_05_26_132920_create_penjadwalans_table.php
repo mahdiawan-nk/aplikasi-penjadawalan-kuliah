@@ -18,11 +18,14 @@ class CreatePenjadwalansTable extends Migration
             $table->integer('id_matkul');
             $table->integer('id_kelas');
             $table->integer('id_dosen');
+            $table->integer('semester');
             $table->string('hari');
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->string('rombel');
             $table->string('data_prodi');
+            $table->integer('status')->default(0);
+            $table->integer('kunci')->default(0);
             $table->timestamps();
         });
     }

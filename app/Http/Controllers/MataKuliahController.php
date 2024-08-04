@@ -30,6 +30,11 @@ class MataKuliahController extends Controller
 
             $data = $query->get();
             $dataTable = DataTables::of($data);
+            $dataTable->addIndexColumn()
+                ->addColumn('semester', function ($row) {
+                    return $row->dataSemester? $row->dataSemester->semester:'-';
+                })
+                ->rawColumns(['semester']);
 
             return $dataTable->make(true);
         }
@@ -129,7 +134,7 @@ class MataKuliahController extends Controller
     public function getGrouped(Request $request)
     {
         // Mengambil data program studi
-        $prodi = DB::table('view_matkul_prodi')->select('id', 'nama_matkul as text','id_semester','alias as nama_prodi');
+        $prodi = DB::table('view_matkul_prodi')->select('id', 'nama_matkul as text', 'id_semester', 'alias as nama_prodi');
 
         if ($request->has('prodi')) {
             $id = explode('-', $request->input('prodi'));
@@ -142,9 +147,9 @@ class MataKuliahController extends Controller
         $dataProdi = $prodi->get();
 
         foreach ($dataProdi as $item) {
-            $data[]=[
-                'id'=>$item->id,
-                'text'=>'['.$item->nama_prodi.'][SMT-'.$item->id_semester.']-'.$item->text
+            $data[] = [
+                'id' => $item->id,
+                'text' => '[' . $item->nama_prodi . '][SMT-' . $item->id_semester . ']-' . $item->text
             ];
         }
 

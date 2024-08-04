@@ -15,10 +15,13 @@ class CreateDosensTable extends Migration
     {
         Schema::create('dosens', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('id_prodi');
+            $table->unsignedInteger('id_prodi');
+            $table->string('email',100)->nullable();
             $table->string('nidn',25);
             $table->string('nama_dosen');
             $table->timestamps();
+
+            $table->foreign('id_prodi')->references('id')->on('program_studis')->onDelete('cascade');
         });
     }
 

@@ -97,9 +97,9 @@
                         data: 'nama_matkul'
                     },
                     {
-                        data: 'data_semester',
+                        data: 'semester',
                         render: function(data) {
-                            return data.semester
+                            return data
                         }
                     },
                     {
@@ -150,7 +150,7 @@
 
                 $('#e-kode_matkul').val(data.kode_matkul);
                 $('#e-nama_matkul').val(data.nama_matkul);
-                $('#e-id_semester').val(data.data_semester.id).trigger('change');
+                $('#e-id_semester').val(data.semester).trigger('change');
                 $('#e-praktek').prop('checked', data.type_matkul == 'P');
                 $('#e-teori').prop('checked', data.type_matkul != 'P');
                 $('#e-sks').val(data.sks);

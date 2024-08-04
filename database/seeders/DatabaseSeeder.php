@@ -17,14 +17,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // User::factory(10)->create();
+        User::factory(10)->create();
         User::create([
             'name'=>'Operator',
             'email'=>'operator@mail.com',
             'password'=>Hash::make('12345678'),
             'role'=>1
         ]);
-        // for ($i = 1; $i <= 50; $i++) {
+        // for ($i = 1; $i <= 5; $i++) {
         //     $jenjangOptions = ['D3', 'D4', 'S1', 'S2', 'Profesi'];
         //     $jenjangRandom = $jenjangOptions[array_rand($jenjangOptions)];
 
@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         // $mataKuliah = [];
         // $jenisMataKuliah = ['P', 'T'];
 
-        // for ($prodi = 1; $prodi <= 30; $prodi++) {
+        // for ($prodi = 1; $prodi <= 5; $prodi++) {
         //     for ($semester = 1; $semester <= 8; $semester++) {
         //         for ($i = 1; $i <= 5; $i++) {
         //             // Mata kuliah praktek
@@ -70,6 +70,8 @@ class DatabaseSeeder extends Seeder
         // }
 
         // DB::table('mata_kuliahs')->insert($mataKuliah);
+        
+
         // $gedung = ['A', 'B', 'C', 'D'];
         // $kapasitasOptions = [
         //     '25 - 30',
@@ -96,7 +98,7 @@ class DatabaseSeeder extends Seeder
         // }
 
         // DB::table('kelas')->insert($ruangan);
-        // $totalProdi = 30;
+        // $totalProdi = 5;
         // $minDosen = 5;
         // $maxDosen = 10;
 

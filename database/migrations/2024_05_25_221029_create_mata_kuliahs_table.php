@@ -16,12 +16,14 @@ class CreateMataKuliahsTable extends Migration
         Schema::create('mata_kuliahs', function (Blueprint $table) {
             $table->increments('id');
             $table->string('kode_matkul');
-            $table->integer('id_prodi');
-            $table->integer('id_semester');
+            $table->unsignedInteger('id_prodi');
+            $table->unsignedInteger('id_semester');
             $table->string('nama_matkul');
             $table->set('type_matkul',['P','T']);
             $table->string('sks');
             $table->timestamps();
+
+            $table->foreign('id_prodi')->references('id')->on('program_studis')->onDelete('cascade');
         });
     }
 

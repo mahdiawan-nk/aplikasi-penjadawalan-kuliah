@@ -14,7 +14,7 @@ class UsersViews extends Migration
      */
     public function up()
     {
-        DB::statement("CREATE VIEW users_views AS SELECT a.*,b.nama_prodi FROM users a LEFT JOIN program_studis b ON a.prodi=b.id");
+        DB::statement("CREATE VIEW users_views AS select a.id AS id,a.name AS name,a.email AS email,a.password AS password, a.role AS role,a.created_at AS created_at,a.updated_at AS updated_at from users a");
     }
 
     /**

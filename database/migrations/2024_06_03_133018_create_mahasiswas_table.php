@@ -21,7 +21,13 @@ class CreateMahasiswasTable extends Migration
             $table->string('email')->nullable();
             $table->string('nama')->nullable();
             $table->string('kelas')->nullable();
+            $table->string('alamat')->nullable();
+            $table->string('telp')->nullable();
+            $table->string('jenis_kelamin')->nullable();
+            $table->integer('is_update')->default(0);
             $table->timestamps();
+
+            $table->foreign('id_prodi')->references('id')->on('program_studis')->onDelete('cascade');
         });
     }
 
