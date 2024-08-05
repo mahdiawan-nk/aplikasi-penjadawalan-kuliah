@@ -527,6 +527,7 @@
                             timer: 1500
                         }).then((result) => {
                             fetchListKelasMahasiswa()
+                            modeForm = 'add'
                         })
 
                     })
@@ -629,6 +630,7 @@
 
             $('.add-class').click(function(e) {
                 e.preventDefault();
+                modeForm = 'add'
                 getProdi('#id_program_study', prodi)
                 $('[name="nama_kelas_mahasiswa"]').val('')
                 $('[name="jumlah_mahasiswa"]').val('')
