@@ -526,7 +526,7 @@
                             showConfirmButton: false,
                             timer: 1500
                         }).then((result) => {
-                            fetchListKelasMahasiswa()
+                            fetchListKelasMahasiswa(currentPage, prodi)
                             modeForm = 'add'
                         })
 
