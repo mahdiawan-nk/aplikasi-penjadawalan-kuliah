@@ -6,8 +6,8 @@ use App\Models\Kelas;
 use App\Models\KelasMahasiswa;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Database\QueryException;
 use Carbon\Carbon;
+use Exception;
 
 use function App\Helpers\encrypt;
 
@@ -108,14 +108,14 @@ class KelasController extends Controller
         try {
             $kela->delete();
             return response()->json([
-                'status' => 'success',
+                'success' => true,
                 'message' => 'Data Berhasil Di hapus',
             ]);
-        } catch (QueryException $e) {
+        } catch (Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Data Tidak Dapat dihapus karena terhubung ke data penjadwalan',
-            ], 422);
+                'success' => false,
+                'message' => 'Data Tidak Dapat dihapus karena: ' . $e->getMessage(),
+            ], 200);
         }
     }
 

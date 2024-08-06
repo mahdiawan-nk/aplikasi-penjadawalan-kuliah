@@ -208,7 +208,7 @@
                 data: {
                     'prodi': prodi,
                     'page': page,
-                    'paginate':true
+                    'paginate': true
                 },
                 // async: false,
                 dataType: "JSON",
@@ -349,6 +349,7 @@
                 let id = $(this).data('id')
                 idData = id
                 modeForm = 'edit'
+                getProdi('#id_program_study', prodi)
                 $.ajax({
                     type: "GET",
                     url: "{{ url('kelasmahasiswa') }}" + "/" + id,
@@ -365,7 +366,7 @@
 
                     }
                 });
-                $('.add-class').trigger('click');
+                $('#new-class-modal').modal('show')
             });
 
             $('#list-kelas-mahasiswa').on('click', '.delete-kelas', function(e) {
@@ -401,16 +402,26 @@
                                 return response.json();
                             })
                             .then(data => {
-                                Swal.fire({
-                                    position: "top-end",
-                                    icon: "success",
-                                    title: "Your work has been Delete",
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                }).then((result) => {
-                                    idData = null
-                                    fetchListKelasMahasiswa()
-                                })
+                                if (data.success) {
+                                    Swal.fire({
+                                        position: "top-end",
+                                        icon: "success",
+                                        title: "Your work has been Delete",
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    }).then((result) => {
+                                        idData = null
+                                        fetchListKelasMahasiswa(currentPage, prodi)
+                                    })
+                                }
+                                else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: data.message
+                                    });
+                                }
+
                             })
                             .catch(error => {
                                 console.error('Error deleting data:', error);
@@ -600,7 +611,7 @@
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken // sertakan token CSRF di sini
+                        'X-CSRF-TOKEN': csrfTokens // sertakan token CSRF di sini
                     }
                 };
 
@@ -612,19 +623,28 @@
                         return response.json();
                     })
                     .then(data => {
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "success",
-                            title: "Your work has been Delete",
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then((result) => {
-                            idData = null
-                            table.ajax.reload(null, false);
-                        })
+                        if (data.success) {
+                            Swal.fire({
+                                position: "top-end",
+                                icon: "success",
+                                title: "Your work has been Delete",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then((result) => {
+                                idData = null
+                                table.ajax.reload(null, false);
+                            })
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: data.message
+                            });
+                        }
+
                     })
                     .catch(error => {
-                        console.error('Error deleting data:', error);
+                        console.error(error);
                     });
             }
 

@@ -6,6 +6,7 @@ use App\Models\KelasMahasiswa;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Database\QueryException;
+use Exception;
 
 class KelasMahasiswaController extends Controller
 {
@@ -121,14 +122,14 @@ class KelasMahasiswaController extends Controller
         try {
             $kelasmahasiswa->delete();
             return response()->json([
-                'status' => 'success',
+                'success' => true,
                 'message' => 'Data Berhasil Di hapus',
             ]);
-        } catch (QueryException $e) {
+        } catch (Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Data Tidak Dapat dihapus karena terhubung ke data',
-            ], 422);
+                'success' => false,
+                'message' => 'Data Tidak Dapat dihapus karena terhubung ke data'. $e->getMessage(),
+            ], 200);
         }
     }
 }

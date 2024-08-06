@@ -386,6 +386,8 @@
                         return
                     }
                     statusKeys = true
+                } else {
+                    statusKeys = true
                 }
                 if (statusKeys) {
                     let prodi = []
@@ -577,6 +579,8 @@
                         });
                         return
                     }
+                    statusKeys = true
+                } else {
                     statusKeys = true
                 }
 
