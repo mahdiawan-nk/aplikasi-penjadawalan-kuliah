@@ -188,6 +188,7 @@ class PenjadwalanController extends Controller
         // Pemeriksaan bentrok semester
         $conflictSemester = Penjadwalan::where('semester', $request->semester)
             ->where('hari', $request->hari)
+            ->where('data_prodi', $request->data_prodi)
             ->where(function ($query) use ($request) {
                 $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
                     ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])

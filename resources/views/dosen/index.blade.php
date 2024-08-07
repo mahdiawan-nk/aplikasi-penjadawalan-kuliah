@@ -178,14 +178,15 @@
                             url: "{{ url('pengguna') }}/" + data.id + "/" + type,
                             dataType: "JSON",
                             success: function(response) {
-                                Swal.fire({
-                                    icon: "success",
-                                    title: "Success",
-                                    text: "Account Has Created, Use NIDN for Password",
-                                }).then((result) => {
-                                    idData = null
-                                    table.ajax.reload(null, false);
-                                })
+                                console.log(response)
+                                // Swal.fire({
+                                //     icon: "success",
+                                //     title: "Success",
+                                //     text: "Account Has Created, Use NIDN for Password",
+                                // }).then((result) => {
+                                //     idData = null
+                                //     table.ajax.reload(null, false);
+                                // })
                             },
                             error(error) {
                                 Swal.fire({

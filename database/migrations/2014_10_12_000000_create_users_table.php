@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->set('role',[1,2,3,4])->comment('1=>Operator 2=>Kaprodi 3=>dosen 4=>Mahasiswa');
+            $table->integer('role')->comment('1=>Operator 2=>Kaprodi 3=>dosen 4=>Mahasiswa');
             $table->string('id_telegram')->nullable();
             $table->timestamps();
         });
