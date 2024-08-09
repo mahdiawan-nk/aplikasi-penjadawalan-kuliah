@@ -78,8 +78,9 @@
                         <div class="row mb-3">
                             <label class="col-sm-3 col-form-label">Rombel Kelas</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="rombel" name="rombel"
-                                    placeholder="Enter Romebel Kelas" required disabled>
+                                <select name="rombel" id="rombel" class="form-control" disabled>
+                                    <option value="">Pilih Rombel</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -131,11 +132,25 @@
         $(function() {
             var jenisRequest = {{ $status }}
             var dataKelas = @json($data);
+            const prodiUser = '{{ App\helpers\infoUser()->id_prodi ?? 0 }}'
             const hariIni = new Date();
             const opsional = {
                 weekday: 'long'
             };
             const namaHari = hariIni.toLocaleDateString('id-ID', opsional);
+            const fetchRombel = async (prodi) => {
+                const res = await fetch('/kelasmahasiswa?prodi=' + prodi)
+                const data = await res.json()
+                let viewRombel = $('#rombel,#e-rombel')
+                viewRombel.empty()
+                viewRombel.html(`<option value="">-- Pilih Rombel --</option>`)
+                data.forEach(element => {
+                    viewRombel.append(
+                        `<option value="${element.id}">${element.nama_kelas} - ${element.jumlah_mahasiswa} MHS</option>`
+                    )
+                });
+            }
+            fetchRombel(prodiUser)
             $("#jam_mulai").flatpickr({
                 enableTime: true,
                 noCalendar: true,
@@ -161,6 +176,16 @@
                 noCalendar: true,
                 dateFormat: "H:i",
                 time_24hr: true
+            });
+
+            $('#rombel').change(function(e) {
+                e.preventDefault();
+                let ids = $(this).val()
+                let hari = $('#hari').val()
+                let jam_mulai = $('#jam_mulai').val()
+                let jam_selesai = $('#jam_selesai').val()
+                $('#id_kelas').removeAttr('disabled');
+                getKelas('',ids, hari, jam_mulai, jam_selesai)
             });
 
             $('form#form-add').submit(function(e) {
@@ -225,28 +250,69 @@
 
             }
 
-            var getKelas = (kelas) => {
+            function getKelas(idKelas,rombel, hari, jamMulai, jamSelesai) {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
                     'content');
-                const url = '{{ route('master.kelas.getgrouped', ['group' => ':idData']) }}'.replace(
-                    ':idData', 'all');
-                $.ajax({
-                    type: "GET",
-                    url: url,
-                    dataType: "JSON",
-                    success: function(data) {
-                        $("#id_kelas").select2({
+                const url = '{{ url('kelas/all/grouped') }}' +
+                    `?rombel_id=${rombel}&hari=${hari}&jam_mulai=${jamMulai}&jam_selesai=${jamSelesai}`;
+                fetch(url, {
+                        method: 'GET',
+                        parameters: {
+                            rombel_id: rombel,
+                            hari: hari,
+                            jam_mulai: jam_mulai,
+                            jam_selesai: jam_selesai
+                        },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        $("#id_kelas,#e-id_kelas").select2({
                             theme: "bootstrap-5",
                             data: data,
                             templateResult: formatData,
                             templateSelection: formatData
                         });
-                        if (kelas != null) {
-                            $('#id_kelas').val(kelas).trigger('change')
+                        if (idKelas != null) {
+                            $('#id_kelas').val(idKelas).trigger('change')
                         }
-                    }
-                });
+
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
             }
+            // var getKelas = (kelas) => {
+            //     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
+            //         'content');
+            //     const url = '{{ route('master.kelas.getgrouped', ['group' => ':idData']) }}'.replace(
+            //         ':idData', 'all');
+            //     $.ajax({
+            //         type: "GET",
+            //         url: url,
+            //         dataType: "JSON",
+            //         success: function(data) {
+            //             $("#id_kelas").select2({
+            //                 theme: "bootstrap-5",
+            //                 data: data,
+            //                 templateResult: formatData,
+            //                 templateSelection: formatData
+            //             });
+            //             if (kelas != null) {
+            //                 $('#id_kelas').val(kelas).trigger('change')
+            //             }
+            //         }
+            //     });
+            // }
 
             let getDosen = (dosen) => {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
@@ -284,7 +350,7 @@
                 $('#konfirmasi').prop('checked', true)
                 $('#id_jadwal').attr('disabled', false)
                 getJadwalKuliah()
-                getKelas(dataKelas)
+                // getKelas(dataKelas)
             }
             $('#id_jadwal').change(function(e) {
                 e.preventDefault();
@@ -312,7 +378,7 @@
                         if (dataKelas != null) {
                             getKelas(null)
                         } else {
-                            getKelas(response.id_kelas)
+                            getKelas(response.id_kelas,response.id_kelas, response.hari, jam_mulai, jam_selesai)
 
                         }
 

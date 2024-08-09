@@ -15,6 +15,7 @@ class CreatePeminjamanKelasTable extends Migration
     {
         Schema::create('peminjaman_kelas', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('id_user');
             $table->unsignedInteger('id_kelas');
             $table->unsignedInteger('id_jadwal');
             $table->unsignedInteger('id_dosen');
@@ -31,6 +32,7 @@ class CreatePeminjamanKelasTable extends Migration
             $table->foreign('id_kelas')->references('id')->on('kelas')->onDelete('cascade');
             $table->foreign('id_jadwal')->references('id')->on('penjadwalans')->onDelete('cascade');
             $table->foreign('id_dosen')->references('id')->on('dosens')->onDelete('cascade');
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -91,7 +91,8 @@
                         },
                     },
                     {
-                        data: 'user_request'
+                        data: 'user_request',
+                        visible: roles == 1 ? true : false
                     },
                     {
                         data: 'kelas',
@@ -129,6 +130,7 @@
                     },
                     {
                         data: 'status_penggunaan',
+                        visible: roles == 4 ? true : false,
                         render: function(data) {
                             let btn;
                             if (data == 0) {
@@ -149,23 +151,26 @@
                     },
                     {
                         data: 'status_admin',
+                        visible: roles == 1 ? true : false,
                         render: function(data) {
+                            console.log(data)
                             if (data != 1) {
                                 return `<div class="d-flex flex-row">
                                             <button type="button" class="btn btn-outline-secondary btn-sm px-2 me-1 konfirmasi"
                                                 fdprocessedid="2ybyt"><i
                                                     class="fa-solid fa-check mr-1"></i>Konfirmasi</button>
                                         </div>`
+                            }else{
+                                return ''
                             }
 
-                            return ''
 
                         }
                     }
 
                 ]
             });
-
+            
             channel.bind('my-event', function(data) {
                 console.log(data.message.userId)
                 if (data.message.userId == idUser) {
@@ -264,9 +269,7 @@
 
 
 
-            table.column(9).visible(roles == 4 ? true : false);
-            table.column(10).visible(roles == 1 ? true : false);
-            table.column(2).visible(roles == 1 ? true : false);
+            
 
             $('.add').on('click', function() {
                 const url = '{{ route('trx.peminjaman.new') }}';
